@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Graph Elements</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Poppins:wght@300;400;600;800&display=swap');
+        
+        :root {
+            --primary: #2563eb;
+            --secondary: #0f172a;
+            --accent1: #f97316;
+            --accent2: #10b981;
+            --accent3: #8b5cf6;
+            --light: #f8fafc;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', 'Poppins', sans-serif;
+            background-color: var(--secondary);
+            color: var(--light);
+            overflow-x: hidden;
+        }
+        
+        .grid-item {
+            border-radius: 1rem;
+            background-color: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .grid-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .tag {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-right: 0.25rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .tag-bp {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .tag-pd {
+            background-color: var(--accent1);
+            color: white;
+        }
+        
+        .tag-ir {
+            background-color: var(--accent2);
+            color: white;
+        }
+        
+        .section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 0;
+            width: 3rem;
+            height: 0.25rem;
+            background: linear-gradient(90deg, var(--primary), var(--accent3));
+            border-radius: 0.25rem;
+        }
+        
+        .element-name {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+        
+        .element-id {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+        }
+        
+        .element-desc {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .section-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .gradient-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(37, 99, 235, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 1) 0%, rgba(15, 23, 42, 0.8) 100%);
+            z-index: -1;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+        
+        .header {
+            grid-column: 1 / -1;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .scroll-indicator {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--primary);
+            color: white;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            z-index: 100;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .scroll-indicator:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="gradient-bg"></div>
+    
+    <div class="scroll-indicator" id="scrollTop">
+        <i class="mdi mdi-arrow-up"></i>
+    </div>
+    
+    <div class="grid-container">
+        <div class="header text-center py-10">
+            <h1 class="text-5xl md:text-7xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">知识图谱记忆要素</h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8">商业计划书、Pitch Deck与投资人汇报的结构化信息要素</p>
+            
+            <div class="legend flex flex-wrap justify-center">
+                <div class="flex items-center">
+                    <span class="tag tag-bp">BP</span>
+                    <span class="ml-1 text-sm">商业计划书</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="tag tag-pd">PD</span>
+                    <span class="ml-1 text-sm">Pitch Deck</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="tag tag-ir">IR</span>
+                    <span class="ml-1 text-sm">投资人汇报</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 1: 公司概览 -->
+        <div class="grid-item col-span-full p-6 bg-gradient-to-br from-blue-900/30 to-blue-800/10">
+            <h2 class="section-title text-2xl font-bold flex items-center">
+                <i class="mdi mdi-office-building section-icon"></i>一、公司概览 <span class="text-sm ml-2 opacity-70">Company Overview</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="element">
+                    <div class="element-name">公司正式名称</div>
+                    <div class="element-id">CompanyFullName</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">公司简称/品牌名</div>
+                    <div class="element-id">CompanyNameShort</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">使命宣言</div>
+                    <div class="element-id">MissionStatement</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">愿景展望</div>
+                    <div class="element-id">VisionStatement</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">核心问题陈述</div>
+                    <div class="element-id">ProblemStatement</div>
+                    <div class="element-desc">描述市场痛点或用户未被满足的需求</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">解决方案描述</div>
+                    <div class="element-id">SolutionDescription</div>
+                    <div class="element-desc">阐述产品或服务如何解决核心问题</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">独特价值主张 (UVP)</div>
+                    <div class="element-id">UniqueValueProposition</div>
+                    <div class="element-desc">区别于竞争对手的核心优势和特点</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">公司发展阶段</div>
+                    <div class="element-id">CompanyStage</div>
+                    <div class="element-desc">例如：种子期、天使轮、A轮、成长期等</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">成立日期/运营时长</div>
+                    <div class="element-id">DateEstablished_OperatingDuration</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">一句话定位/电梯演讲</div>
+                    <div class="element-id">ElevatorPitch</div>
+                    <div class="mt-1">
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 2: 市场与机遇 -->
+        <div class="grid-item col-span-full p-6 bg-gradient-to-br from-purple-900/30 to-purple-800/10">
+            <h2 class="section-title text-2xl font-bold flex items-center">
+                <i class="mdi mdi-chart-line section-icon"></i>二、市场与机遇 <span class="text-sm ml-2 opacity-70">Market & Opportunity</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="element">
+                    <div class="element-name">目标市场描述</div>
+                    <div class="element-id">TargetMarketDescription</div>
+                    <div class="element-desc">详细描绘理想客户画像及细分市场</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">总体有效市场 (TAM)</div>
+                    <div class="element-id">MarketSize_TAM</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">可服务市场 (SAM)</div>
+                    <div class="element-id">MarketSize_SAM</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">可获得服务市场 (SOM)</div>
+                    <div class="element-id">MarketSize_SOM</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">市场增长趋势与驱动因素</div>
+                    <div class="element-id">MarketTrends_Drivers</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">市场验证数据/证据</div>
+                    <div class="element-id">MarketValidationData</div>
+                    <div class="element-desc">例如：用户调研、早期用户反馈、意向订单等</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 3: 产品与技术 -->
+        <div class="grid-item col-span-full p-6 bg-gradient-to-br from-indigo-900/30 to-indigo-800/10">
+            <h2 class="section-title text-2xl font-bold flex items-center">
+                <i class="mdi mdi-cube-outline section-icon"></i>三、产品与技术 <span class="text-sm ml-2 opacity-70">Product & Technology</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="element">
+                    <div class="element-name">产品/服务名称</div>
+                    <div class="element-id">ProductName_ServiceName</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">产品/服务详细介绍</div>
+                    <div class="element-id">ProductServiceDetails</div>
+                    <div class="element-desc">功能、特性、实现技术、架构（如适用）</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">产品演示/视觉材料</div>
+                    <div class="element-id">ProductDemo_Visuals</div>
+                    <div class="element-desc">截图、演示视频链接、原型等</div>
+                    <div class="mt-1">
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">核心技术栈</div>
+                    <div class="element-id">TechnologyStack</div>
+                    <div class="element-desc">（若构成核心竞争力或有必要说明时）</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">知识产权情况</div>
+                    <div class="element-id">IntellectualProperty</div>
+                    <div class="element-desc">专利、商标、著作权等</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">产品研发路线图</div>
+                    <div class="element-id">ProductDevelopmentRoadmap</div>
+                    <div class="element-desc">已完成功能、当前进展、未来规划</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">产品核心数据/用户行为指标</div>
+                    <div class="element-id">ProductUsageMetrics</div>
+                    <div class="element-desc">例如：DAU/MAU、用户活跃度、功能使用频率、留存率等</div>
+                    <div class="mt-1">
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 4: 商业模式与战略 -->
+        <div class="grid-item col-span-full p-6 bg-gradient-to-br from-cyan-900/30 to-cyan-800/10">
+            <h2 class="section-title text-2xl font-bold flex items-center">
+                <i class="mdi mdi-strategy section-icon"></i>四、商业模式与战略 <span class="text-sm ml-2 opacity-70">Business Model & Strategy</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="element">
+                    <div class="element-name">营收模式</div>
+                    <div class="element-id">RevenueStreams</div>
+                    <div class="element-desc">如何创造收入，例如：订阅费、销售、广告、服务费等</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">定价策略</div>
+                    <div class="element-id">PricingStrategy</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">销售策略与渠道</div>
+                    <div class="element-id">SalesStrategy_Channels</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">市场营销策略与渠道</div>
+                    <div class="element-id">MarketingStrategy_Channels</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">用户获取成本 (CAC)</div>
+                    <div class="element-id">CustomerAcquisitionCost_CAC</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">用户生命周期价值 (LTV)</div>
+                    <div class="element-id">CustomerLifetimeValue_LTV</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">关键合作伙伴</div>
+                    <div class="element-id">KeyPartnerships</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">市场进入策略 (GTM)</div>
+                    <div class="element-id">GoToMarketStrategy</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">增长战略</div>
+                    <div class="element-id">GrowthStrategy</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 5: 竞争格局 -->
+        <div class="grid-item col-span-full p-6 bg-gradient-to-br from-red-900/30 to-red-800/10">
+            <h2 class="section-title text-2xl font-bold flex items-center">
+                <i class="mdi mdi-sword-cross section-icon"></i>五、竞争格局 <span class="text-sm ml-2 opacity-70">Competitive Landscape</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="element">
+                    <div class="element-name">主要竞争对手分析</div>
+                    <div class="element-id">KeyCompetitorsAnalysis</div>
+                    <div class="element-desc">列出主要竞争者及其简要情况</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">竞争优势</div>
+                    <div class="element-id">CompetitiveAdvantages</div>
+                    <div class="element-desc">相较于对手，我方的核心优势</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">竞争劣势/自身弱点</div>
+                    <div class="element-id">CompetitiveDisadvantages_Weaknesses</div>
+                    <div class="element-desc">（内部评估，用于BP的SWOT分析）</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">竞争格局图/对比矩阵</div>
+                    <div class="element-id">CompetitiveMatrix_PositioningMap</div>
+                    <div class="element-desc">（可选，用于直观展示）</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 6: 团队 -->
+        <div class="grid-item col-span-full p-6 bg-gradient-to-br from-amber-900/30 to-amber-800/10">
+            <h2 class="section-title text-2xl font-bold flex items-center">
+                <i class="mdi mdi-account-group section-icon"></i>六、团队 <span class="text-sm ml-2 opacity-70">Team</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="element">
+                    <div class="element-name">核心创始团队成员</div>
+                    <div class="element-id">FoundingTeamMembers</div>
+                    <div class="element-desc">姓名、职位、核心职责、相关经验和背景</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">关键顾问/导师</div>
+                    <div class="element-id">KeyAdvisors_Mentors</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">组织架构</div>
+                    <div class="element-id">OrganizationalStructure</div>
+                    <div class="element-desc">（若有必要）</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">近期重要人事变动</div>
+                    <div class="element-id">RecentKeyHires_Departures</div>
+                    <div class="element-desc">（主要针对投资人报告）</div>
+                    <div class="mt-1">
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">团队文化与价值观</div>
+                    <div class="element-id">TeamCulture_Values</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 7: 运营成果与里程碑 -->
+        <div class="grid-item col-span-full p-6 bg-gradient-to-br from-green-900/30 to-green-800/10">
+            <h2 class="section-title text-2xl font-bold flex items-center">
+                <i class="mdi mdi-flag-checkered section-icon"></i>七、运营成果与里程碑 <span class="text-sm ml-2 opacity-70">Traction & Milestones</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="element">
+                    <div class="element-name">已达成的关键里程碑</div>
+                    <div class="element-id">HistoricalMilestonesAchieved</div>
+                    <div class="element-desc">重要的历史成就</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">当前运营数据/成果</div>
+                    <div class="element-id">CurrentTractionMetrics</div>
+                    <div class="element-desc">用户数、营收额、付费用户数、合同订单等</div>
+                    <div class="mt-1">
+                        <span class="tag tag-pd">PD</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">未来短期/中期里程碑计划</div>
+                    <div class="element-id">UpcomingMilestones</div>
+                    <div class="element-desc">未来3-12个月的目标</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">核心业绩指标 (KPIs) - 目标值</div>
+                    <div class="element-id">KPIs_Targets</div>
+                    <div class="element-desc">具体、可衡量的业务目标</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">核心业绩指标 (KPIs) - 实际达成</div>
+                    <div class="element-id">KPIs_Actuals</div>
+                    <div class="element-desc">对照目标的实际表现</div>
+                    <div class="mt-1">
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 8: 财务状况与预测 -->
+        <div class="grid-item col-span-full p-6 bg-gradient-to-br from-emerald-900/30 to-emerald-800/10">
+            <h2 class="section-title text-2xl font-bold flex items-center">
+                <i class="mdi mdi-chart-bar section-icon"></i>八、财务状况与预测 <span class="text-sm ml-2 opacity-70">Financials</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="element">
+                    <div class="element-name">历史财务摘要</div>
+                    <div class="element-id">HistoricalFinancialsSummary</div>
+                    <div class="element-desc">过去1-3年的营收、主要成本、利润等（若有）</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">财务预测 - 收入</div>
+                    <div class="element-id">FinancialProjections_Revenue</div>
+                    <div class="element-desc">未来3-5年预测</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">财务预测 - 支出</div>
+                    <div class="element-id">FinancialProjections_Expenses</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">财务预测 - 盈利能力</div>
+                    <div class="element-id">FinancialProjections_Profitability</div>
+                    <div class="element-desc">例如：毛利率、净利率、盈亏平衡点</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">融资历史</div>
+                    <div class="element-id">FundingHistory</div>
+                    <div class="element-desc">过往融资轮次、金额、主要投资方</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">本轮融资需求</div>
+                    <div class="element-id">CurrentFundingAsk_Amount</div>
+                    <div class="element-desc">（若正在融资）</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">资金使用计划</div>
+                    <div class="element-id">UseOfFunds</div>
+                    <div class="element-desc">本轮融资资金的具体用途，或已融资金的使用情况</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">月度现金消耗率 (Burn Rate)</div>
+                    <div class="element-id">BurnRate</div>
+                    <div class="mt-1">
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">现金储备可用月数 (Cash Runway)</div>
+                    <div class="element-id">CashRunway</div>
+                    <div class="mt-1">
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">财务模型的关键假设</div>
+                    <div class="element-id">KeyAssumptions_FinancialModel</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 9: 风险与对策 -->
+        <div class="grid-item col-span-full p-6 bg-gradient-to-br from-rose-900/30 to-rose-800/10">
+            <h2 class="section-title text-2xl font-bold flex items-center">
+                <i class="mdi mdi-alert-circle-outline section-icon"></i>九、风险与对策 <span class="text-sm ml-2 opacity-70">Risks & Mitigation</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="element">
+                    <div class="element-name">主要潜在风险</div>
+                    <div class="element-id">PotentialRisks</div>
+                    <div class="element-desc">市场风险、执行风险、技术风险、财务风险、政策风险等</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">风险应对策略</div>
+                    <div class="element-id">MitigationStrategies</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">已遇到的主要挑战</div>
+                    <div class="element-id">ChallengesFaced</div>
+                    <div class="element-desc">运营过程中实际遇到的困难</div>
+                    <div class="mt-1">
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">从挑战中获得的经验教训</div>
+                    <div class="element-id">LearningsFromChallenges</div>
+                    <div class="mt-1">
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 10: 投资人关系 -->
+        <div class="grid-item col-span-full p-6 bg-gradient-to-br from-sky-900/30 to-sky-800/10">
+            <h2 class="section-title text-2xl font-bold flex items-center">
+                <i class="mdi mdi-handshake section-icon"></i>十、投资人关系 <span class="text-sm ml-2 opacity-70">Investor Relations Specifics</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="element">
+                    <div class="element-name">投资人报告周期</div>
+                    <div class="element-id">InvestorReportingPeriod</div>
+                    <div class="element-desc">例如：月度、季度</div>
+                    <div class="mt-1">
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">过往投资人提出的关键问题及回复</div>
+                    <div class="element-id">PreviousInvestorQuestions_Responses</div>
+                    <div class="mt-1">
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">投资人反馈的采纳与执行情况</div>
+                    <div class="element-id">InvestorFeedbackImplementation</div>
+                    <div class="mt-1">
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">针对投资人的行动倡议</div>
+                    <div class="element-id">CallToAction_Investor</div>
+                    <div class="element-desc">例如：请求会议、寻求特定支持</div>
+                    <div class="mt-1">
+                        <span class="tag tag-pd">PD</span>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">核心联系方式</div>
+                    <div class="element-id">ContactInformation</div>
+                    <div class="mt-1">
+                        <span class="tag tag-bp">BP</span>
+                        <span class="tag tag-pd">PD</span>
+                        <span class="tag tag-ir">IR</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-span-full text-center py-10">
+            <h2 class="text-3xl font-bold mb-4">知识图谱记忆要素总览</h2>
+            <p class="text-xl text-gray-300 mb-6">共计 <span class="text-white font-bold">10</span> 个主要类别，<span class="text-white font-bold">70+</span> 个信息记忆要素</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <div class="stat p-4 bg-blue-900/30 rounded-lg">
+                    <div class="stat-title text-sm">商业计划书 (BP)</div>
+                    <div class="stat-value text-2xl font-bold">56</div>
+                    <div class="stat-desc text-xs">适用记忆要素数</div>
+                </div>
+                <div class="stat p-4 bg-orange-900/30 rounded-lg">
+                    <div class="stat-title text-sm">Pitch Deck (PD)</div>
+                    <div class="stat-value text-2xl font-bold">42</div>
+                    <div class="stat-desc text-xs">适用记忆要素数</div>
+                </div>
+                <div class="stat p-4 bg-green-900/30 rounded-lg">
+                    <div class="stat-title text-sm">投资人汇报 (IR)</div>
+                    <div class="stat-value text-2xl font-bold">48</div>
+                    <div class="stat-desc text-xs">适用记忆要素数</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize GSAP ScrollTrigger
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Animate grid items on scroll
+            gsap.utils.toArray('.grid-item').forEach((item, i) => {
+                gsap.from(item, {
+                    y: 50,
+                    opacity: 0,
+                    duration: 0.8,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: item,
+                        start: "top 80%",
+                        toggleActions: "play none none none"
+                    }
+                });
+            });
+            
+            // Animate elements within grid items
+            gsap.utils.toArray('.element').forEach((element, i) => {
+                gsap.from(element, {
+                    y: 20,
+                    opacity: 0,
+                    duration: 0.5,
+                    delay: 0.1 * (i % 3),
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: element,
+                        start: "top 90%",
+                        toggleActions: "play none none none"
+                    }
+                });
+            });
+            
+            // Scroll to top button functionality
+            const scrollTopBtn = document.getElementById('scrollTop');
+            scrollTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Show/hide scroll to top button based on scroll position
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 300) {
+                    scrollTopBtn.style.opacity = '1';
+                } else {
+                    scrollTopBtn.style.opacity = '0';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
