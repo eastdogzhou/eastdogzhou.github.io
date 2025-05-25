@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruitment Knowledge Graph</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Poppins:wght@300;400;600;800&display=swap');
+        
+        :root {
+            --primary: #4f46e5;
+            --secondary: #0f172a;
+            --accent1: #ec4899;
+            --accent2: #0ea5e9;
+            --accent3: #22c55e;
+            --accent4: #f59e0b;
+            --accent5: #8b5cf6;
+            --light: #f8fafc;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', 'Poppins', sans-serif;
+            background-color: var(--secondary);
+            color: var(--light);
+            overflow-x: hidden;
+        }
+        
+        .grid-item {
+            border-radius: 1rem;
+            background-color: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .grid-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .element {
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+        
+        .element:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 0;
+            width: 3rem;
+            height: 0.25rem;
+            border-radius: 0.25rem;
+        }
+        
+        .section-1 .section-title::after {
+            background: linear-gradient(90deg, var(--primary), var(--accent5));
+        }
+        
+        .section-2 .section-title::after {
+            background: linear-gradient(90deg, var(--accent1), var(--accent5));
+        }
+        
+        .section-3 .section-title::after {
+            background: linear-gradient(90deg, var(--accent2), var(--primary));
+        }
+        
+        .section-4 .section-title::after {
+            background: linear-gradient(90deg, var(--accent3), var(--accent2));
+        }
+        
+        .section-5 .section-title::after {
+            background: linear-gradient(90deg, var(--accent4), var(--accent1));
+        }
+        
+        .element-name {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+        
+        .element-id {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+        }
+        
+        .element-desc {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .section-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+        
+        .element-icon {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+            opacity: 0.8;
+        }
+        
+        .gradient-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(79, 70, 229, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 1) 0%, rgba(15, 23, 42, 0.8) 100%);
+            z-index: -1;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+        
+        .header {
+            grid-column: 1 / -1;
+        }
+        
+        .scroll-indicator {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--primary);
+            color: white;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            z-index: 100;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+        
+        .scroll-indicator:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+        }
+        
+        .stage-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        
+        .stage-1 { background-color: var(--primary); }
+        .stage-2 { background-color: var(--accent1); }
+        .stage-3 { background-color: var(--accent2); }
+        .stage-4 { background-color: var(--accent3); }
+        .stage-5 { background-color: var(--accent4); }
+        
+        .process-flow {
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .process-flow::before {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary), var(--accent1), var(--accent2), var(--accent3));
+        }
+        
+        .process-step {
+            position: relative;
+            margin-bottom: 12px;
+            padding-left: 15px;
+        }
+        
+        .process-step::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--accent2);
+        }
+        
+        .stat-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0.5rem 0;
+            background: linear-gradient(90deg, var(--primary), var(--accent1));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="gradient-bg"></div>
+    
+    <div class="scroll-indicator" id="scrollTop">
+        <i class="mdi mdi-arrow-up"></i>
+    </div>
+    
+    <div class="grid-container">
+        <div class="header text-center py-10">
+            <h1 class="text-5xl md:text-7xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">招聘知识图谱</h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8">人才招聘全流程的结构化信息要素</p>
+            
+            <div class="flex flex-wrap justify-center gap-3 mb-8">
+                <div class="flex items-center">
+                    <span class="stage-indicator stage-1"></span>
+                    <span class="text-sm">职位需求与定义</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="stage-indicator stage-2"></span>
+                    <span class="text-sm">招聘流程管理</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="stage-indicator stage-3"></span>
+                    <span class="text-sm">候选人信息</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="stage-indicator stage-4"></span>
+                    <span class="text-sm">Offer与入职</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="stage-indicator stage-5"></span>
+                    <span class="text-sm">雇主品牌与候选人体验</span>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
+                <div class="stat-card">
+                    <div class="text-xs uppercase tracking-wider opacity-70">职位需求</div>
+                    <div class="stat-value">14</div>
+                    <div class="text-xs">信息要素</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-xs uppercase tracking-wider opacity-70">招聘流程</div>
+                    <div class="stat-value">13</div>
+                    <div class="text-xs">信息要素</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-xs uppercase tracking-wider opacity-70">候选人信息</div>
+                    <div class="stat-value">10</div>
+                    <div class="text-xs">信息要素</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-xs uppercase tracking-wider opacity-70">Offer与入职</div>
+                    <div class="stat-value">8</div>
+                    <div class="text-xs">信息要素</div>
+                </div>
+                <div class="stat-card">
+                    <div class="text-xs uppercase tracking-wider opacity-70">雇主品牌</div>
+                    <div class="stat-value">6</div>
+                    <div class="text-xs">信息要素</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 1: 职位需求与定义 -->
+        <div class="grid-item col-span-full p-6 bg-gradient-to-br from-indigo-900/30 to-indigo-800/10 section-1">
+            <h2 class="section-title text-2xl font-bold flex items-center">
+                <i class="mdi mdi-file-document-outline section-icon" style="color: var(--primary);"></i>一、职位需求与定义 <span class="text-sm ml-2 opacity-70">Job Requisition & Definition</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-tag-outline element-icon" style="color: var(--primary);"></i>职位名称
+                    </div>
+                    <div class="element-id">JobTitle</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-domain element-icon" style="color: var(--primary);"></i>所属部门
+                    </div>
+                    <div class="element-id">Department</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-account-supervisor-outline element-icon" style="color: var(--primary);"></i>汇报对象/直线经理
+                    </div>
+                    <div class="element-id">ReportingManager</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-stairs element-icon" style="color: var(--primary);"></i>职位级别/职级
+                    </div>
+                    <div class="element-id">JobLevel_Grade</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-map-marker-outline element-icon" style="color: var(--primary);"></i>工作地点
+                    </div>
+                    <div class="element-id">WorkLocation</div>
+                    <div class="element-desc">城市、具体办公区、远程/混合办公选项</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-briefcase-outline element-icon" style="color: var(--primary);"></i>职位类型
+                    </div>
+                    <div class="element-id">EmploymentType</div>
+                    <div class="element-desc">全职、兼职、合同、实习等</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-help-circle-outline element-icon" style="color: var(--primary);"></i>招聘原因/背景
+                    </div>
+                    <div class="element-id">ReasonForHiring</div>
+                    <div class="element-desc">新增HC、替换、项目需求等</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-clipboard-text-outline element-icon" style="color: var(--primary);"></i>职位核心职责 (JD - Responsibilities)
+                    </div>
+                    <div class="element-id">JobResponsibilities</div>
+                    <div class="element-desc">详细描述该岗位的主要工作内容和职责</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-certificate-outline element-icon" style="color: var(--primary);"></i>任职资格要求 (JD - Qualifications)
+                    </div>
+                    <div class="element-id">JobQualifications_Requirements</div>
+                    <div class="element-desc">必需的技能、经验、学历、证书等</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-star-outline element-icon" style="color: var(--primary);"></i>加分项/优先考虑条件 (JD - Preferred)
+                    </div>
+                    <div class="element-id">PreferredQualifications</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-calendar-outline element-icon" style="color: var(--primary);"></i>期望到岗日期
+                    </div>
+                    <div class="element-id">ExpectedStartDate</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-cash-multiple element-icon" style="color: var(--primary);"></i>薪资范围/预算
+                    </div>
+                    <div class="element-id">SalaryRange_Budget</div>
+                    <div class="element-desc">（内部信息，或根据地区法规决定是否公开）</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-identifier element-icon" style="color: var(--primary);"></i>职位编制/HC编码
+                    </div>
+                    <div class="element-id">HeadcountID_RequisitionID</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-lightbulb-outline element-icon" style="color: var(--primary);"></i>职位简介/吸引点
+                    </div>
+                    <div class="element-id">JobSummary_SellingPoints</div>
+                    <div class="element-desc">用于招聘广告，突出职位的吸引力</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 2: 招聘流程管理 -->
+        <div class="grid-item col-span-full p-6 bg-gradient-to-br from-pink-900/30 to-pink-800/10 section-2">
+            <h2 class="section-title text-2xl font-bold flex items-center">
+                <i class="mdi mdi-chart-gantt section-icon" style="color: var(--accent1);"></i>二、招聘流程管理 <span class="text-sm ml-2 opacity-70">Recruitment Process Management</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-account-tie-outline element-icon" style="color: var(--accent1);"></i>招聘负责人/HRBP
+                    </div>
+                    <div class="element-id">Recruiter_HRBP_InCharge</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-account-supervisor-circle-outline element-icon" style="color: var(--accent1);"></i>用人经理
+                    </div>
+                    <div class="element-id">HiringManager_Name_Contact</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-account-group-outline element-icon" style="color: var(--accent1);"></i>面试官团队
+                    </div>
+                    <div class="element-id">InterviewPanel</div>
+                    <div class="element-desc">姓名、职位、面试轮次/重点</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-radar element-icon" style="color: var(--accent1);"></i>招聘渠道策略
+                    </div>
+                    <div class="element-id">SourcingChannelsStrategy</div>
+                    <div class="element-desc">内推、招聘网站、猎头、社交媒体、校园招聘等</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-filter-outline element-icon" style="color: var(--accent1);"></i>简历筛选标准
+                    </div>
+                    <div class="element-id">ResumeScreeningCriteria</div>
+                </div>
+                
+                <div class="element col-span-1 md:col-span-2">
+                    <div class="element-name">
+                        <i class="mdi mdi-arrow-decision-outline element-icon" style="color: var(--accent1);"></i>面试流程步骤
+                    </div>
+                    <div class="element-id">InterviewProcessSteps</div>
+                    <div class="element-desc">招聘流程的各个阶段</div>
+                    <div class="process-flow mt-3">
+                        <div class="process-step">HR初筛</div>
+                        <div class="process-step">技术一面</div>
+                        <div class="process-step">技术二面</div>
+                        <div class="process-step">用人经理面试</div>
+                        <div class="process-step">HR面试</div>
+                        <div class="process-step">背景调查</div>
+                        <div class="process-step">Offer</div>
+                    </div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-brain element-icon" style="color: var(--accent1);"></i>各轮面试重点评估能力
+                    </div>
+                    <div class="element-id">KeyCompetenciesPerInterviewStage</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-comment-question-outline element-icon" style="color: var(--accent1);"></i>标准面试问题库 (按岗位/能力)
+                    </div>
+                    <div class="element-id">StandardizedInterviewQuestions</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-notebook-outline element-icon" style="color: var(--accent1);"></i>笔试/作业/在线测评安排
+                    </div>
+                    <div class="element-id">WrittenTest_Assignment_OnlineAssessment</div>
+                    <div class="element-desc">（如适用）内容、平台、评估标准</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-clipboard-check-outline element-icon" style="color: var(--accent1);"></i>候选人评估表/反馈模板
+                    </div>
+                    <div class="element-id">CandidateEvaluationForm_FeedbackTemplate</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-timer-outline element-icon" style="color: var(--accent1);"></i>招聘时间表/SLA
+                    </div>
+                    <div class="element-id">RecruitmentTimeline_SLA</div>
+                    <div class="element-desc">各阶段预计耗时</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-pipe element-icon" style="color: var(--accent1);"></i>招聘状态追踪
+                    </div>
+                    <div class="element-id">CandidatePipelineStatus</div>
+                    <div class="element-desc">各候选人所处阶段</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-chart-line element-icon" style="color: var(--accent1);"></i>招聘数据指标
+                    </div>
+                    <div class="element-id">RecruitmentMetrics</div>
+                    <div class="element-desc">例如：到面率、Offer接受率、平均招聘周期、渠道有效性等</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 3: 候选人信息 -->
+        <div class="grid-item col-span-full p-6 bg-gradient-to-br from-blue-900/30 to-blue-800/10 section-3">
+            <h2 class="section-title text-2xl font-bold flex items-center">
+                <i class="mdi mdi-account-outline section-icon" style="color: var(--accent2);"></i>三、候选人信息 <span class="text-sm ml-2 opacity-70">Candidate Information</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-account-circle-outline element-icon" style="color: var(--accent2);"></i>候选人姓名
+                    </div>
+                    <div class="element-id">CandidateName</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-phone-outline element-icon" style="color: var(--accent2);"></i>候选人联系方式
+                    </div>
+                    <div class="element-id">CandidateContactInfo</div>
+                    <div class="element-desc">电话、邮箱</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-file-account-outline element-icon" style="color: var(--accent2);"></i>候选人简历/作品集链接
+                    </div>
+                    <div class="element-id">CandidateResume_PortfolioLink</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-source-branch element-icon" style="color: var(--accent2);"></i>候选人来源渠道
+                    </div>
+                    <div class="element-id">CandidateSourceChannel</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-currency-usd element-icon" style="color: var(--accent2);"></i>候选人当前/期望薪资
+                    </div>
+                    <div class="element-id">CandidateCurrent_ExpectedSalary</div>
+                    <div class="element-desc">（注意合规性）</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-calendar-clock element-icon" style="color: var(--accent2);"></i>候选人可到岗时间
+                    </div>
+                    <div class="element-id">CandidateAvailability</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-comment-text-outline element-icon" style="color: var(--accent2);"></i>候选人面试反馈记录
+                    </div>
+                    <div class="element-id">CandidateInterviewFeedback</div>
+                    <div class="element-desc">各面试官的评价</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-chart-bell-curve element-icon" style="color: var(--accent2);"></i>候选人测评结果
+                    </div>
+                    <div class="element-id">CandidateAssessmentResults</div>
+                    <div class="element-desc">（如适用）</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-shield-check-outline element-icon" style="color: var(--accent2);"></i>背景调查报告
+                    </div>
+                    <div class="element-id">BackgroundCheckReport</div>
+                    <div class="element-desc">（如适用，需候选人授权）</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-puzzle-check-outline element-icon" style="color: var(--accent2);"></i>候选人与职位匹配度分析
+                    </div>
+                    <div class="element-id">CandidateJobFitAnalysis</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 4: Offer与入职 -->
+        <div class="grid-item col-span-full p-6 bg-gradient-to-br from-green-900/30 to-green-800/10 section-4">
+            <h2 class="section-title text-2xl font-bold flex items-center">
+                <i class="mdi mdi-handshake-outline section-icon" style="color: var(--accent3);"></i>四、Offer与入职 <span class="text-sm ml-2 opacity-70">Offer & Onboarding Preparation</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-check-decagram-outline element-icon" style="color: var(--accent3);"></i>Offer审批流程记录
+                    </div>
+                    <div class="element-id">OfferApprovalProcess</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-file-document-edit-outline element-icon" style="color: var(--accent3);"></i>Offer详细条款
+                    </div>
+                    <div class="element-id">OfferDetails</div>
+                    <div class="element-desc">薪资、福利、期权、合同期限等</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-calendar-export element-icon" style="color: var(--accent3);"></i>Offer发放日期
+                    </div>
+                    <div class="element-id">OfferIssueDate</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-checkbox-marked-circle-outline element-icon" style="color: var(--accent3);"></i>Offer接受/拒绝状态及日期
+                    </div>
+                    <div class="element-id">OfferAcceptanceStatus_Date</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-file-document-multiple-outline element-icon" style="color: var(--accent3);"></i>入职材料清单
+                    </div>
+                    <div class="element-id">OnboardingDocumentsRequired</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-message-text-outline element-icon" style="color: var(--accent3);"></i>入职前沟通记录
+                    </div>
+                    <div class="element-id">PreOnboardingCommunicationLog</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-account-supervisor-circle element-icon" style="color: var(--accent3);"></i>新员工导师/伙伴安排
+                    </div>
+                    <div class="element-id">NewHireBuddy_MentorAssignment</div>
+                    <div class="element-desc">（如适用）</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-laptop element-icon" style="color: var(--accent3);"></i>办公设备/账号准备清单
+                    </div>
+                    <div class="element-id">WorkEquipment_AccountSetupList</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 5: 雇主品牌与候选人体验 -->
+        <div class="grid-item col-span-full p-6 bg-gradient-to-br from-amber-900/30 to-amber-800/10 section-5">
+            <h2 class="section-title text-2xl font-bold flex items-center">
+                <i class="mdi mdi-heart-outline section-icon" style="color: var(--accent4);"></i>五、雇主品牌与候选人体验 <span class="text-sm ml-2 opacity-70">Employer Branding & Candidate Experience</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-flag-outline element-icon" style="color: var(--accent4);"></i>公司文化与价值观 (招聘宣传材料)
+                    </div>
+                    <div class="element-id">CompanyCulture_Values_ForRecruitment</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-gift-outline element-icon" style="color: var(--accent4);"></i>员工福利与发展机会 (招聘宣传材料)
+                    </div>
+                    <div class="element-id">EmployeeBenefits_DevelopmentOpportunities_ForRecruitment</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-email-outline element-icon" style="color: var(--accent4);"></i>招聘过程中的沟通模板
+                    </div>
+                    <div class="element-id">CommunicationTemplates_Recruitment</div>
+                    <div class="element-desc">自动回复、面试邀请、感谢信、拒信等</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-star-half-full element-icon" style="color: var(--accent4);"></i>候选人体验反馈收集
+                    </div>
+                    <div class="element-id">CandidateExperienceSurvey_Feedback</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-web element-icon" style="color: var(--accent4);"></i>招聘网站/公司招聘页内容
+                    </div>
+                    <div class="element-id">CareersPageContent</div>
+                    <div class="element-desc">公司介绍、职位列表、员工故事、工作环境展示</div>
+                </div>
+                
+                <div class="element">
+                    <div class="element-name">
+                        <i class="mdi mdi-twitter element-icon" style="color: var(--accent4);"></i>社交媒体招聘内容
+                    </div>
+                    <div class="element-id">SocialMediaRecruitingContent</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-span-full text-center py-10">
+            <h2 class="text-3xl font-bold mb-6">招聘流程关键连接点</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <div class="p-5 bg-gradient-to-br from-indigo-900/20 to-pink-900/20 rounded-lg">
+                    <h3 class="text-xl font-bold mb-3 text-purple-300">职位需求 → 招聘流程</h3>
+                    <p class="text-sm text-gray-300 mb-4">职位需求如何影响招聘流程的设计与执行</p>
+                    <ul class="text-sm space-y-2">
+                        <li class="flex items-start">
+                            <span class="stage-indicator stage-1 mt-1.5 mr-2"></span>
+                            <span>职位核心职责 → 面试重点评估能力</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="stage-indicator stage-1 mt-1.5 mr-2"></span>
+                            <span>任职资格要求 → 简历筛选标准</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="stage-indicator stage-1 mt-1.5 mr-2"></span>
+                            <span>职位简介/吸引点 → 招聘渠道策略</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="p-5 bg-gradient-to-br from-blue-900/20 to-green-900/20 rounded-lg">
+                    <h3 class="text-xl font-bold mb-3 text-blue-300">候选人信息 → Offer决策</h3>
+                    <p class="text-sm text-gray-300 mb-4">候选人信息如何影响Offer决策与入职准备</p>
+                    <ul class="text-sm space-y-2">
+                        <li class="flex items-start">
+                            <span class="stage-indicator stage-3 mt-1.5 mr-2"></span>
+                            <span>候选人面试反馈记录 → Offer审批流程</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="stage-indicator stage-3 mt-1.5 mr-2"></span>
+                            <span>候选人当前/期望薪资 → Offer详细条款</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="stage-indicator stage-3 mt-1.5 mr-2"></span>
+                            <span>候选人可到岗时间 → 入职准备安排</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-10 p-5 bg-gradient-to-br from-indigo-900/20 via-pink-900/20 to-amber-900/20 rounded-lg max-w-4xl mx-auto">
+                <h3 class="text-xl font-bold mb-3 text-indigo-300">招聘全流程数据闭环</h3>
+                <p class="text-sm text-gray-300 mb-4">从职位发布到候选人入职的完整数据链路</p>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-2 text-xs">
+                    <div class="p-2 bg-indigo-900/30 rounded flex flex-col items-center">
+                        <i class="mdi mdi-file-document-outline text-2xl mb-1" style="color: var(--primary);"></i>
+                        <div>职位需求</div>
+                        <div class="text-gray-400 mt-1">14个数据点</div>
+                    </div>
+                    <div class="p-2 bg-pink-900/30 rounded flex flex-col items-center">
+                        <i class="mdi mdi-chart-gantt text-2xl mb-1" style="color: var(--accent1);"></i>
+                        <div>招聘流程</div>
+                        <div class="text-gray-400 mt-1">13个数据点</div>
+                    </div>
+                    <div class="p-2 bg-blue-900/30 rounded flex flex-col items-center">
+                        <i class="mdi mdi-account-outline text-2xl mb-1" style="color: var(--accent2);"></i>
+                        <div>候选人信息</div>
+                        <div class="text-gray-400 mt-1">10个数据点</div>
+                    </div>
+                    <div class="p-2 bg-green-900/30 rounded flex flex-col items-center">
+                        <i class="mdi mdi-handshake-outline text-2xl mb-1" style="color: var(--accent3);"></i>
+                        <div>Offer与入职</div>
+                        <div class="text-gray-400 mt-1">8个数据点</div>
+                    </div>
+                    <div class="p-2 bg-amber-900/30 rounded flex flex-col items-center">
+                        <i class="mdi mdi-heart-outline text-2xl mb-1" style="color: var(--accent4);"></i>
+                        <div>雇主品牌</div>
+                        <div class="text-gray-400 mt-1">6个数据点</div>
+                    </div>
+                </div>
+                <div class="mt-4 text-center text-sm">
+                    <span class="text-white font-bold">总计51个结构化信息要素</span>，构建完整招聘知识图谱
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize GSAP ScrollTrigger
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Animate grid items on scroll
+            gsap.utils.toArray('.grid-item').forEach((item, i) => {
+                gsap.from(item, {
+                    y: 50,
+                    opacity: 0,
+                    duration: 0.8,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: item,
+                        start: "top 80%",
+                        toggleActions: "play none none none"
+                    }
+                });
+            });
+            
+            // Animate elements within grid items
+            gsap.utils.toArray('.element').forEach((element, i) => {
+                gsap.from(element, {
+                    y: 20,
+                    opacity: 0,
+                    duration: 0.5,
+                    delay: 0.1 * (i % 3),
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: element,
+                        start: "top 90%",
+                        toggleActions: "play none none none"
+                    }
+                });
+            });
+            
+            // Scroll to top button functionality
+            const scrollTopBtn = document.getElementById('scrollTop');
+            scrollTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Show/hide scroll to top button based on scroll position
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 300) {
+                    scrollTopBtn.style.opacity = '1';
+                } else {
+                    scrollTopBtn.style.opacity = '0';
+                }
+            });
+            
+            // Animate process steps
+            gsap.utils.toArray('.process-step').forEach((step, i) => {
+                gsap.from(step, {
+                    x: -20,
+                    opacity: 0,
+                    duration: 0.3,
+                    delay: 0.1 * i,
+                    ease: "power1.out",
+                    scrollTrigger: {
+                        trigger: step,
+                        start: "top 90%",
+                        toggleActions: "play none none none"
+                    }
+                });
+            });
+            
+            // Animate stat cards
+            gsap.utils.toArray('.stat-card').forEach((card, i) => {
+                gsap.from(card, {
+                    y: 30,
+                    opacity: 0,
+                    duration: 0.5,
+                    delay: 0.1 * i,
+                    ease: "back.out(1.7)",
+                    scrollTrigger: {
+                        trigger: card,
+                        start: "top 90%",
+                        toggleActions: "play none none none"
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
