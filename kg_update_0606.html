@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no">
+    <title>Knowledge Graph Business Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <style>
+        :root {
+            --bg-pattern: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            
+            /* 主色调 - 高端蓝紫色调 */
+            --primary-color: #5B67EC;
+            --primary-light: #8A94F8;
+            --primary-dark: #3A46C8;
+            
+            /* 辅助色 - 温暖橙色调 */
+            --secondary-color: #FF6B6B;
+            --secondary-light: #FF9E9E;
+            --secondary-dark: #E04444;
+            
+            /* 强调色 - 清新绿松石色 */
+            --accent-color: #12B6A8;
+            --accent-light: #4ED8CC;
+            --accent-dark: #0A8C82;
+            
+            /* 背景色系 - 优雅深色系 */
+            --bg-dark: #101522;
+            --bg-card: #1A2035;
+            --bg-card-hover: #232A40;
+            --bg-accent: #131B2E;
+            
+            /* 文本色系 - 清晰分层 */
+            --text-primary: #F0F3FF;
+            --text-secondary: #C9D0E8;
+            --text-muted: #8E99BC;
+            --text-hint: #5D6A96;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 0.5vw;
+            height: 0.5vw;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(26, 32, 53, 0.5);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(91, 103, 236, 0.5);
+            border-radius: 0.5vw;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(91, 103, 236, 0.8);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow-x: hidden;
+            background-image: linear-gradient(to bottom right, rgba(19, 27, 46, 0.7), rgba(16, 21, 34, 0.9));
+        }
+
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            position: relative;
+        }
+
+        /* 基础幻灯片样式 */
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background-color: #121212;
+            position: relative;
+        }
+
+        /* 装饰背景纹理 */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-image: var(--bg-pattern);
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        /* 幻灯片内容区域 */
+        .slide-content {
+            padding: 5vh 5vw;
+            width: 90vw;
+            max-width: 90vw;
+            margin-left: auto;
+            margin-right: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+            z-index: 1;
+            overflow-y: hidden;
+        }
+
+        /* 确保关键内容在视觉黄金分割点 */
+        .key-content {
+            padding-top: 30vh;
+        }
+
+        /* PPT 标题样式 */
+        .ppt-title {
+            font-size: 5vw;
+            line-height: 1.2;
+            font-weight: 800;
+            margin-bottom: 5vh;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0.2vh 2vh rgba(91, 103, 236, 0.2);
+        }
+
+        /* PPT 副标题样式 */
+        .ppt-subtitle {
+            font-size: 2.5vw;
+            line-height: 1.3;
+            font-weight: 600;
+            margin-bottom: 4vh;
+            color: var(--text-secondary);
+        }
+
+        /* PPT 正文样式 */
+        .ppt-body {
+            font-size: 1.5vw;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        
+        .ppt-body ul {
+            list-style-type: disc;
+            padding-left: 2.5vw;
+            margin-top: 1.5vh;
+        }
+        
+        .ppt-body li {
+            margin-bottom: 1vh;
+        }
+
+        /* 幻灯片导航 */
+        .slide-nav {
+            position: fixed;
+            bottom: 3vh;
+            left: 0;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .slide-dots {
+            display: flex;
+            justify-content: center;
+            gap: 1vw;
+        }
+
+        .slide-dot {
+            width: 1vw;
+            height: 1vw;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .slide-dot.active {
+            background-color: var(--primary-light);
+            transform: scale(1.2);
+            box-shadow: 0 0 1vh var(--primary-light);
+        }
+
+        .slide-arrow {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4vw;
+            height: 4vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 2vw;
+            z-index: 100;
+            transition: all 0.2s ease;
+            opacity: 0.5;
+            box-shadow: 0 0.5vh 1vh rgba(0, 0, 0, 0.3);
+        }
+
+        .slide-arrow:hover {
+            background-color: var(--primary-color);
+            opacity: 1;
+            box-shadow: 0 0.5vh 1.5vh rgba(91, 103, 236, 0.5);
+        }
+
+        .slide-arrow.prev {
+            left: 2vw;
+        }
+
+        .slide-arrow.next {
+            right: 2vw;
+        }
+
+        /* 强调元素样式 */
+        .emphasis {
+            border: 0.2vw solid transparent;
+            border-image: linear-gradient(45deg, var(--primary-light), var(--accent-light)) 1;
+            padding: 2vh 2vw;
+            transition: all 0.3s ease;
+            background-color: var(--bg-card);
+            box-shadow: 0 0.5vh 1.5vh rgba(0, 0, 0, 0.2);
+        }
+
+        .emphasis:hover {
+            transform: translateY(-0.5vh);
+            box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.3), 0 0 0 0.1vh var(--primary-light);
+            background-color: var(--bg-card-hover);
+        }
+
+        /* 首页特殊样式 */
+        #slide1 h1 {
+            font-size: 5vw;
+            line-height: 1.1;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 0.1em;
+            text-align: left;
+            text-shadow: 0 0.2vh 2vh rgba(91, 103, 236, 0.3);
+        }
+
+        #slide1 .title-separator {
+            width: 100%;
+            height: 0.3vh;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--secondary-color));
+            margin-top: 2vh;
+            margin-bottom: 3vh;
+            box-shadow: 0 0.2vh 1vh rgba(91, 103, 236, 0.3);
+        }
+
+        #slide1 .subtitle {
+            font-size: 2.5vw;
+            line-height: 1.2;
+            letter-spacing: 0.5vw;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+            text-align: left;
+            width: 100%;
+            text-transform: uppercase;
+        }
+
+        #slide1 .bottom-section {
+            position: absolute;
+            bottom: 2vh;
+            left: 0;
+            right: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0 5vw;
+            box-sizing: border-box;
+            max-width: 90vw;
+            margin: 0 auto;
+        }
+
+        #slide1 .contact p {
+            margin: 0.5vh 0;
+            font-size: 1.3vw;
+            line-height: 1.3;
+            color: var(--text-muted);
+        }
+
+        #slide1 .contact .contact-item {
+            display: inline-block;
+            margin-right: 2vw;
+        }
+
+        #slide1 .copyright p {
+            margin: 0.5vh 0;
+            font-size: 0.9vw;
+            line-height: 1.3;
+            color: var(--text-muted);
+        }
+
+        /* 重置动画状态类 */
+        .animated {
+            opacity: 1;
+            transform: none;
+        }
+        
+        .animated.animate-done {
+            opacity: 1;
+            transform: none;
+            transition: none;
+        }
+
+        /* 数据对比卡片样式 */
+        .compare-card {
+            background: var(--bg-card);
+            border-radius: 1.5vh;
+            padding: 3vh 2.5vw;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .compare-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 0.5vh;
+            background: linear-gradient(90deg, var(--primary-light), var(--accent-light));
+        }
+
+        .big-number {
+            font-size: 6vw;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1;
+            margin-bottom: 1vh;
+        }
+
+        .metric-label {
+            font-size: 1.3vw;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1vw;
+        }
+
+        /* 特征标签样式 */
+        .feature-tag {
+            display: inline-block;
+            background: rgba(91, 103, 236, 0.2);
+            border: 0.1vw solid var(--primary-light);
+            border-radius: 2vh;
+            padding: 0.5vh 1.5vw;
+            font-size: 1.2vw;
+            color: var(--primary-light);
+            margin-right: 1vw;
+            margin-bottom: 1vh;
+        }
+
+        /* Bad case 样式 */
+        .bad-case-item {
+            background: rgba(255, 107, 107, 0.1);
+            border-left: 0.4vw solid var(--secondary-color);
+            padding: 1.5vh 2vw;
+            margin-bottom: 2vh;
+            border-radius: 0 1vh 1vh 0;
+        }
+
+        .bad-case-item h4 {
+            color: var(--secondary-light);
+            font-size: 1.8vw;
+            margin-bottom: 0.5vh;
+        }
+
+        /* Report 对比项样式 */
+        .report-item {
+            background: var(--bg-card);
+            border-radius: 1vh;
+            padding: 2vh 2vw;
+            margin-bottom: 2vh;
+            border: 0.1vw solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .report-item:hover {
+            border-color: var(--primary-light);
+            transform: translateX(0.5vw);
+        }
+
+        .report-item h4 {
+            color: var(--accent-light);
+            font-size: 1.8vw;
+            margin-bottom: 1vh;
+        }
+
+        /* Report 改进卡片样式 */
+        .improvement-card {
+            background: linear-gradient(135deg, rgba(91, 103, 236, 0.1), rgba(18, 182, 168, 0.1));
+            border-radius: 1vh;
+            padding: 2vh 2.5vw;
+            margin-bottom: 1.5vh;
+            border-left: 0.3vw solid var(--accent-light);
+        }
+
+        .improvement-card h4 {
+            color: var(--accent-light);
+            font-size: 1.6vw;
+            margin-bottom: 0.8vh;
+            font-weight: 700;
+        }
+
+        .improvement-card p {
+            font-size: 1.2vw;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <!-- Slide 1: 标题页 -->
+        <div id="slide1" class="slide">
+            <div class="slide-content key-content">
+                <h1 class="animated">带有预置信息的知识图谱提取</h1>
+                <div class="title-separator animated"></div>
+                <p class="subtitle animated">Business Domain Analysis & Evolution</p>
+            </div>
+
+            <div class="bottom-section animated">
+                <div class="contact">
+                    <p><span class="contact-item">📊 Graph Comparison</span><span class="contact-item">🔍 Insight Discovery</span></p>
+                </div>
+                <div class="copyright">
+                    <p>© 2025 Knowledge Graph Analysis Report</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: 知识图谱版本对比概览 -->
+        <div id="slide2" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">版本对比概览</h2>
+                <p class="ppt-subtitle animated">Previous vs Current Knowledge Graph Analysis</p>
+                
+                <div class="grid grid-cols-2 gap-8">
+                    <div class="compare-card animated">
+                        <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Previous Version</h3>
+                        <div class="mb-4">
+                            <div class="big-number">81</div>
+                            <p class="metric-label">Edges</p>
+                        </div>
+                        <div class="mb-4">
+                            <div class="big-number">88</div>
+                            <p class="metric-label">Nodes</p>
+                        </div>
+                        <div class="mt-4">
+                            <span class="feature-tag">6个群组</span>
+                            <span class="feature-tag">半年数据</span>
+                        </div>
+                    </div>
+                    
+                    <div class="compare-card animated">
+                        <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">Current Version</h3>
+                        <div class="mb-4">
+                            <div class="big-number">202</div>
+                            <p class="metric-label">Edges</p>
+                        </div>
+                        <div class="mb-4">
+                            <div class="big-number">170</div>
+                            <p class="metric-label">Nodes</p>
+                        </div>
+                        <div class="mt-4">
+                            <span class="feature-tag">2个群组</span>
+                            <span class="feature-tag">3个月数据</span>
+                            <span class="feature-tag">AI技术+产品</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="emphasis animated mt-6">
+                    <p class="text-center" style="font-size: 1.8vw; color: var(--accent-light);">
+                        <iconify-icon icon="mdi:trending-up" width="2vw"></iconify-icon>
+                        增长 <span style="font-weight: 900;">149%</span> Edges | <span style="font-weight: 900;">93%</span> Nodes
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: 新增内容的关键发现 -->
+        <div id="slide3" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">新增内容关键发现</h2>
+                <p class="ppt-subtitle animated">Representative New Business Insights</p>
+                
+                <div class="grid gap-4">
+                    <div class="report-item animated">
+                        <h4><iconify-icon icon="mdi:rocket-launch" width="1.5vw"></iconify-icon> GTM战略与规划</h4>
+                        <p style="font-size: 1.3vw;">Nodes: GTM, GTM Plan, 转化率 | 明确区分内容(fuel)和分发渠道(engine)</p>
+                    </div>
+                    
+                    <div class="report-item animated">
+                        <h4><iconify-icon icon="mdi:currency-usd" width="1.5vw"></iconify-icon> 定价与成本管理</h4>
+                        <p style="font-size: 1.3vw;">Token Cost, Inference Cost优化 | 9美元月费定价策略</p>
+                    </div>
+                    
+                    <div class="report-item animated">
+                        <h4><iconify-icon icon="mdi:shield-sword" width="1.5vw"></iconify-icon> 竞品分析与市场定位</h4>
+                        <p style="font-size: 1.3vw;">Mem0, Paradot AI, NotebookLM, Claude Enterprise深度分析</p>
+                    </div>
+                    
+                    <div class="report-item animated">
+                        <h4><iconify-icon icon="mdi:account-group" width="1.5vw"></iconify-icon> 组织创新</h4>
+                        <p style="font-size: 1.3vw;">AI Committee成立 | Shanghai Team结构调整</p>
+                    </div>
+                    
+                    <div class="report-item animated">
+                        <h4><iconify-icon icon="mdi:flag-checkered" width="1.5vw"></iconify-icon> 产品里程碑</h4>
+                        <p style="font-size: 1.3vw;">Tanka 1.0.5→1.0.9版本迭代 | 218里程碑交付</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Bad Case分析 -->
+        <div id="slide4" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">Bad Case 分析</h2>
+                <p class="ppt-subtitle animated">非商业相关节点的识别与处理</p>
+                
+                <div class="bad-case-item animated">
+                    <h4>学术奖项类</h4>
+                    <p style="font-size: 1.3vw;">Nobel Prize in Chemistry 2024 - 科学奖项本身非商业活动</p>
+                </div>
+                
+                <div class="bad-case-item animated">
+                    <h4>学术领域概念</h4>
+                    <p style="font-size: 1.3vw;">Neuroscience, Cognitive Science等 - 作为讨论对象相关但本身非商业</p>
+                </div>
+                
+                <div class="bad-case-item animated">
+                    <h4>医疗健康产品</h4>
+                    <p style="font-size: 1.3vw;">Cobenfy, Gene Therapy, Mini-brain Model等 - 间接商业相关性</p>
+                </div>
+
+                <div class="emphasis animated mt-6">
+                    <h3 style="color: var(--accent-light); font-size: 2vw; margin-bottom: 1vh;">
+                        <iconify-icon icon="mdi:lightbulb" width="2vw"></iconify-icon> 关键洞察
+                    </h3>
+                    <p style="font-size: 1.4vw;">这些节点因被商业主体讨论（R&D、市场分析或投资）而具备相关性，但需注意其间接性</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Business Memory Report对比 -->
+        <div id="slide5" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">Memory Report Update, An example</h2>
+                <p class="ppt-subtitle animated">基于新版KG生成的Business Memory Report</p>
+                
+                <div style="max-height: 70vh; overflow-y: auto; padding-right: 1vw;">
+                    <div class="improvement-card animated">
+                        <h4><iconify-icon icon="mdi:chart-box" width="1.5vw"></iconify-icon> 更广泛的市场竞争对手分析</h4>
+                        <p>不仅保留Glean和Slack，还新增Microsoft 365 Copilot、Notion等主流AI办公协作平台。详细分析了Slack AI、Microsoft 365 Copilot和Notion如何利用AI技术改进团队协作和信息处理方式，全面展现Tanka面临的竞争格局。</p>
+                    </div>
+
+                    <div class="improvement-card animated">
+                        <h4><iconify-icon icon="mdi:feature-search" width="1.5vw"></iconify-icon> Column功能的详细介绍</h4>
+                        <p>新增Tanka的Column功能详解，将其定位为协作工具，用于管理团队成员之间的内容和互动，旨在提高团队环境中的生产力。此功能在Report 1中完全未涉及。</p>
+                    </div>
+
+                    <div class="improvement-card animated">
+                        <h4><iconify-icon icon="mdi:strategy" width="1.5vw"></iconify-icon> 更具体的市场策略描述</h4>
+                        <p>从笼统描述升级为四维策略框架：差异化竞争、用户体验至上、整合现有平台、持续创新。具体包括如何整合WhatsApp、Slack等现有平台，以及评估与Notion、Dropbox等平台的整合方案。</p>
+                    </div>
+
+                    <div class="improvement-card animated">
+                        <h4><iconify-icon icon="mdi:alert-circle" width="1.5vw"></iconify-icon> 技术挑战和用户接受度讨论</h4>
+                        <p>新增对Tanka面临的技术挑战深度分析，如LLMs的"幻觉"问题，以及员工对AI使用情况被监控的隐私担忧。这些关键挑战在Report 1中完全未被提及。</p>
+                    </div>
+
+                    <div class="improvement-card animated">
+                        <h4><iconify-icon icon="mdi:cube-outline" width="1.5vw"></iconify-icon> 更详细的产品技术分析</h4>
+                        <p>深入分析Tanka核心产品，包括记忆功能、智能回复、Column协作工具等，引用Mem0等技术细节，使产品功能和技术架构更加清晰。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-nav">
+        <div class="slide-dots"></div>
+    </div>
+    <div class="slide-arrow prev">◀</div>
+    <div class="slide-arrow next">▶</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slideContainer = document.querySelector('.slide-container');
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelector('.slide-dots');
+            const prevBtn = document.querySelector('.slide-arrow.prev');
+            const nextBtn = document.querySelector('.slide-arrow.next');
+            let currentSlide = 0;
+            
+            // 创建导航点
+            slides.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.classList.add('slide-dot');
+                if (index === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => scrollToSlide(index));
+                dots.appendChild(dot);
+            });
+
+            // 更新活动导航点
+            function updateActiveDot() {
+                document.querySelectorAll('.slide-dot').forEach((dot, index) => {
+                    if (index === currentSlide) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            }
+
+            // 滚动到指定幻灯片
+            function scrollToSlide(index) {
+                if (index < 0) index = 0;
+                if (index >= slides.length) index = slides.length - 1;
+                
+                currentSlide = index;
+                slides[index].scrollIntoView({ behavior: 'smooth' });
+                updateActiveDot();
+            }
+
+            // 滚动事件监听
+            slideContainer.addEventListener('scroll', function() {
+                requestAnimationFrame(() => {
+                    const scrollPosition = slideContainer.scrollTop;
+                    const windowHeight = window.innerHeight;
+                    
+                    let activeIndex = 0;
+                    slides.forEach((slide, index) => {
+                        const slideTop = slide.offsetTop;
+                        if (scrollPosition >= slideTop - windowHeight / 2) {
+                            activeIndex = index;
+                        }
+                    });
+                    
+                    if (currentSlide !== activeIndex) {
+                        currentSlide = activeIndex;
+                        updateActiveDot();
+                    }
+                });
+            });
+
+            // 导航控制
+            prevBtn.addEventListener('click', () => scrollToSlide(currentSlide - 1));
+            nextBtn.addEventListener('click', () => scrollToSlide(currentSlide + 1));
+
+            // 键盘控制
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                    scrollToSlide(currentSlide + 1);
+                } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                    scrollToSlide(currentSlide - 1);
+                }
+            });
+
+            // 触摸滑动支持
+            let touchStartY = 0;
+            
+            document.addEventListener('touchstart', function(e) {
+                touchStartY = e.touches[0].clientY;
+            }, false);
+            
+            document.addEventListener('touchend', function(e) {
+                const touchEndY = e.changedTouches[0].clientY;
+                const yDiff = touchStartY - touchEndY;
+                
+                if (Math.abs(yDiff) > 50) {
+                    if (yDiff > 0) {
+                        scrollToSlide(currentSlide + 1);
+                    } else {
+                        scrollToSlide(currentSlide - 1);
+                    }
+                }
+            }, false);
+        });
+    </script>
+</body>
+</html>
