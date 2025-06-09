@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no">
+    <title>垂直数据研究工具框架 - 演示文稿</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <style>
+        :root {
+            --bg-pattern: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            
+            /* 主色调 - 高端蓝紫色调 */
+            --primary-color: #5B67EC;
+            --primary-light: #8A94F8;
+            --primary-dark: #3A46C8;
+            
+            /* 辅助色 - 温暖橙色调 */
+            --secondary-color: #FF6B6B;
+            --secondary-light: #FF9E9E;
+            --secondary-dark: #E04444;
+            
+            /* 强调色 - 清新绿松石色 */
+            --accent-color: #12B6A8;
+            --accent-light: #4ED8CC;
+            --accent-dark: #0A8C82;
+            
+            /* 背景色系 - 优雅深色系 */
+            --bg-dark: #101522;
+            --bg-card: #1A2035;
+            --bg-card-hover: #232A40;
+            --bg-accent: #131B2E;
+            
+            /* 文本色系 - 清晰分层 */
+            --text-primary: #F0F3FF;
+            --text-secondary: #C9D0E8;
+            --text-muted: #8E99BC;
+            --text-hint: #5D6A96;
+            
+            /* 数据源颜色 */
+            --web-color: #6366F1;
+            --web-color-light: #818CF8;
+            --database-color: #F59E0B;
+            --database-color-light: #FBD38D;
+            --file-color: #10B981;
+            --file-color-light: #86EFAC;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 0.5vw;
+            height: 0.5vw;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(26, 32, 53, 0.5);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(91, 103, 236, 0.5);
+            border-radius: 0.5vw;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(91, 103, 236, 0.8);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow-x: hidden;
+            background-image: linear-gradient(to bottom right, rgba(19, 27, 46, 0.7), rgba(16, 21, 34, 0.9));
+        }
+
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            position: relative;
+        }
+
+        /* 基础幻灯片样式 */
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background-color: #121212;
+            position: relative;
+        }
+
+        /* 装饰背景纹理 */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-image: var(--bg-pattern);
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        /* 幻灯片内容区域 */
+        .slide-content {
+            padding: 5vh 5vw;
+            width: 90vw;
+            max-width: 90vw;
+            margin-left: auto;
+            margin-right: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+            z-index: 1;
+            overflow-y: hidden;
+        }
+
+        /* 确保关键内容在视觉黄金分割点 */
+        .key-content {
+            padding-top: 30vh;
+        }
+
+        /* PPT 标题样式 */
+        .ppt-title {
+            font-size: 5vw;
+            line-height: 1.2;
+            font-weight: 800;
+            margin-bottom: 5vh;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0.2vh 2vh rgba(91, 103, 236, 0.2);
+        }
+
+        /* PPT 副标题样式 */
+        .ppt-subtitle {
+            font-size: 2.5vw;
+            line-height: 1.3;
+            font-weight: 600;
+            margin-bottom: 4vh;
+            color: var(--text-secondary);
+        }
+
+        /* PPT 正文样式 */
+        .ppt-body {
+            font-size: 1.5vw;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        
+        .ppt-body ul {
+            list-style-type: disc;
+            padding-left: 2.5vw;
+            margin-top: 1.5vh;
+        }
+        
+        .ppt-body li {
+            margin-bottom: 1vh;
+        }
+
+        /* 幻灯片导航 */
+        .slide-nav {
+            position: fixed;
+            bottom: 3vh;
+            left: 0;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .slide-dots {
+            display: flex;
+            justify-content: center;
+            gap: 1vw;
+        }
+
+        .slide-dot {
+            width: 1vw;
+            height: 1vw;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .slide-dot.active {
+            background-color: var(--primary-light);
+            transform: scale(1.2);
+            box-shadow: 0 0 1vh var(--primary-light);
+        }
+
+        .slide-arrow {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4vw;
+            height: 4vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 2vw;
+            z-index: 100;
+            transition: all 0.2s ease;
+            opacity: 0.5;
+            box-shadow: 0 0.5vh 1vh rgba(0, 0, 0, 0.3);
+        }
+
+        .slide-arrow:hover {
+            background-color: var(--primary-color);
+            opacity: 1;
+            box-shadow: 0 0.5vh 1.5vh rgba(91, 103, 236, 0.5);
+        }
+
+        .slide-arrow.prev {
+            left: 2vw;
+        }
+
+        .slide-arrow.next {
+            right: 2vw;
+        }
+
+        /* 强调元素样式 */
+        .emphasis {
+            border: 0.2vw solid transparent;
+            border-image: linear-gradient(45deg, var(--primary-light), var(--accent-light)) 1;
+            padding: 2vh 2vw;
+            transition: all 0.3s ease;
+            background-color: var(--bg-card);
+            box-shadow: 0 0.5vh 1.5vh rgba(0, 0, 0, 0.2);
+        }
+
+        .emphasis:hover {
+            transform: translateY(-0.5vh);
+            box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.3), 0 0 0 0.1vh var(--primary-light);
+            background-color: var(--bg-card-hover);
+        }
+
+        /* 首页特殊样式 */
+        #slide1 h1 {
+            font-size: 7vw;
+            line-height: 1.1;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 0.05em;
+            text-align: left;
+            text-shadow: 0 0.2vh 2vh rgba(91, 103, 236, 0.3);
+        }
+
+        #slide1 .title-separator {
+            width: 100%;
+            height: 0.3vh;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--secondary-color));
+            margin-top: 2vh;
+            margin-bottom: 3vh;
+            box-shadow: 0 0.2vh 1vh rgba(91, 103, 236, 0.3);
+        }
+
+        #slide1 .subtitle {
+            font-size: 2.5vw;
+            line-height: 1.2;
+            letter-spacing: 0.1vw;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+            text-align: left;
+            width: 100%;
+        }
+
+        #slide1 .bottom-section {
+            position: absolute;
+            bottom: 2vh;
+            left: 0;
+            right: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0 5vw;
+            box-sizing: border-box;
+            max-width: 90vw;
+            margin: 0 auto;
+        }
+
+        #slide1 .contact p {
+            margin: 0.5vh 0;
+            font-size: 1.3vw;
+            line-height: 1.3;
+            color: var(--text-muted);
+        }
+
+        #slide1 .contact .contact-item {
+            display: inline-block;
+            margin-right: 2vw;
+        }
+
+        #slide1 .copyright p {
+            margin: 0.5vh 0;
+            font-size: 0.9vw;
+            line-height: 1.3;
+            color: var(--text-muted);
+        }
+
+        /* 重置动画状态类 */
+        .animated {
+            opacity: 1;
+            transform: none;
+        }
+        
+        .animated.animate-done {
+            opacity: 1;
+            transform: none;
+            transition: none;
+        }
+
+        .has-visited .animated {
+            opacity: 1;
+            transform: none;
+            animation: none !important;
+        }
+
+        /* 架构图样式 */
+        .architecture-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 2vh;
+            width: 100%;
+            height: 35vh;
+            position: relative;
+            margin-top: 2vh;
+        }
+
+        .arch-layer {
+            flex: 1;
+            display: flex;
+            gap: 2vw;
+            position: relative;
+        }
+
+        .arch-box {
+            flex: 1;
+            border: 0.2vw solid rgba(91, 103, 236, 0.3);
+            border-radius: 1vh;
+            padding: 2vh 2vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .arch-box.web {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05));
+            border-color: var(--web-color);
+        }
+
+        .arch-box.web:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.1));
+            box-shadow: 0 1vh 2vh rgba(99, 102, 241, 0.3);
+        }
+
+        .arch-box.database {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+            border-color: var(--database-color);
+        }
+
+        .arch-box.database:hover {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1));
+            box-shadow: 0 1vh 2vh rgba(245, 158, 11, 0.3);
+        }
+
+        .arch-box.file {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+            border-color: var(--file-color);
+        }
+
+        .arch-box.file:hover {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+            box-shadow: 0 1vh 2vh rgba(16, 185, 129, 0.3);
+        }
+
+        .arch-box:hover {
+            transform: translateY(-0.5vh);
+        }
+
+        .arch-icon {
+            font-size: 3vw;
+            margin-bottom: 1vh;
+        }
+
+        .arch-icon.web {
+            color: var(--web-color-light);
+        }
+
+        .arch-icon.database {
+            color: var(--database-color-light);
+        }
+
+        .arch-icon.file {
+            color: var(--file-color-light);
+        }
+
+        .arch-title {
+            font-size: 1.5vw;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5vh;
+        }
+
+        .arch-desc {
+            font-size: 1vw;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        /* 特性卡片网格 */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2vw;
+            margin-top: 3vh;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-accent));
+            border: 0.1vw solid rgba(91, 103, 236, 0.2);
+            border-radius: 1vh;
+            padding: 3vh 2vw;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 0.3vh;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-0.5vh);
+            box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.3);
+            border-color: var(--primary-light);
+        }
+
+        .feature-number {
+            font-size: 4vw;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1vh;
+            opacity: 0.8;
+        }
+
+        .feature-title {
+            font-size: 1.8vw;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1vh;
+        }
+
+        .feature-desc {
+            font-size: 1.2vw;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* 案例展示样式 */
+        .case-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3vw;
+            align-items: start;
+            margin-top: 3vh;
+        }
+
+        .case-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2vh;
+        }
+
+        .case-tag {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--secondary-color), var(--secondary-light));
+            color: white;
+            padding: 0.5vh 1.5vw;
+            border-radius: 2vh;
+            font-size: 1vw;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        .case-detail {
+            background: var(--bg-card);
+            border-left: 0.3vw solid var(--accent-color);
+            padding: 2vh 2vw;
+            margin: 1vh 0;
+        }
+
+        .case-link-box {
+            background: linear-gradient(135deg, rgba(91, 103, 236, 0.1), rgba(18, 182, 168, 0.1));
+            border: 0.2vw solid rgba(91, 103, 236, 0.3);
+            border-radius: 1vh;
+            padding: 3vh 2vw;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .case-link-box:hover {
+            transform: translateY(-0.5vh);
+            box-shadow: 0 1vh 2vh rgba(91, 103, 236, 0.3);
+            border-color: var(--primary-light);
+            background: linear-gradient(135deg, rgba(91, 103, 236, 0.2), rgba(18, 182, 168, 0.2));
+        }
+
+        .case-link-box h3 {
+            font-size: 1.8vw;
+            color: var(--text-primary);
+            margin-bottom: 1vh;
+        }
+
+        .case-link-box a {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 1vh 2vw;
+            border-radius: 0.5vh;
+            text-decoration: none;
+            font-size: 1.3vw;
+            transition: all 0.3s ease;
+            margin-top: 1vh;
+        }
+
+        .case-link-box a:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        /* 合并页面样式 */
+        .problem-solution-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2vh;
+            height: 100%;
+        }
+
+        .problems-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2vw;
+            margin-bottom: 3vh;
+        }
+
+        .problem-card {
+            background: rgba(255, 107, 107, 0.1);
+            border: 0.15vw solid rgba(255, 107, 107, 0.3);
+            border-radius: 1vh;
+            padding: 2vh 1.5vw;
+            transition: all 0.3s ease;
+        }
+
+        .problem-card:hover {
+            transform: translateY(-0.5vh);
+            box-shadow: 0 0.5vh 2vh rgba(255, 107, 107, 0.2);
+            background: rgba(255, 107, 107, 0.15);
+        }
+
+        .problem-card h3 {
+            color: var(--secondary-light);
+            font-size: 1.5vw;
+            margin-bottom: 1vh;
+        }
+
+        .problem-card p {
+            font-size: 1.1vw;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        .solution-section {
+            flex: 1;
+        }
+
+        .solution-subtitle {
+            font-size: 1.8vw;
+            color: var(--text-secondary);
+            margin-bottom: 2vh;
+        }
+
+        /* Domain DB架构样式 */
+        .domain-arch-container {
+            display: flex;
+            flex-direction: column;
+            gap: 3vh;
+            height: 100%;
+        }
+
+        .agent-architecture {
+            display: flex;
+            gap: 3vw;
+            height: 30vh;
+            align-items: stretch;
+        }
+
+        .master-agent-box {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(91, 103, 236, 0.15), rgba(91, 103, 236, 0.05));
+            border: 0.2vw solid var(--primary-color);
+            border-radius: 1vh;
+            padding: 2vh 2vw;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .master-agent-box:hover {
+            transform: scale(1.02);
+            box-shadow: 0 1vh 2vh rgba(91, 103, 236, 0.3);
+        }
+
+        .student-agents-box {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5vh;
+        }
+
+        .student-agent-card {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(18, 182, 168, 0.15), rgba(18, 182, 168, 0.05));
+            border: 0.15vw solid var(--accent-color);
+            border-radius: 0.8vh;
+            padding: 1.5vh 1.5vw;
+            display: flex;
+            align-items: center;
+            gap: 1vw;
+            transition: all 0.3s ease;
+        }
+
+        .student-agent-card:hover {
+            transform: translateX(0.5vw);
+            box-shadow: 0 0.5vh 1.5vh rgba(18, 182, 168, 0.2);
+        }
+
+        .agent-icon {
+            font-size: 2.5vw;
+        }
+
+        .agent-content h3 {
+            font-size: 1.5vw;
+            color: var(--text-primary);
+            margin-bottom: 0.5vh;
+        }
+
+        .agent-content p {
+            font-size: 1vw;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .io-section {
+            margin-top: 1vh;
+            padding-top: 1vh;
+            border-top: 0.1vw solid rgba(255, 255, 255, 0.1);
+        }
+
+        .io-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5vw;
+            margin: 0.5vh 0;
+        }
+
+        .io-label {
+            font-weight: 600;
+            color: var(--accent-light);
+            min-width: 3vw;
+            font-size: 1vw;
+        }
+
+        .io-desc {
+            flex: 1;
+            font-size: 0.9vw;
+            color: var(--text-secondary);
+        }
+
+        .dev-roadmap {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2vw;
+            margin-top: 2vh;
+        }
+
+        .roadmap-step {
+            background: var(--bg-card);
+            border: 0.15vw solid rgba(91, 103, 236, 0.3);
+            border-radius: 1vh;
+            padding: 2vh 2vw;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .roadmap-step::before {
+            content: attr(data-step);
+            position: absolute;
+            top: -1.5vh;
+            left: 2vw;
+            background: var(--primary-color);
+            color: white;
+            padding: 0.3vh 1vw;
+            border-radius: 1vh;
+            font-size: 1vw;
+            font-weight: 600;
+        }
+
+        .roadmap-step:hover {
+            transform: translateY(-0.5vh);
+            box-shadow: 0 0.5vh 2vh rgba(91, 103, 236, 0.2);
+            border-color: var(--primary-light);
+        }
+
+        .roadmap-step h4 {
+            font-size: 1.3vw;
+            color: var(--text-primary);
+            margin-bottom: 1vh;
+            margin-top: 1vh;
+        }
+
+        .roadmap-step p {
+            font-size: 1.1vw;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* 连接线样式 */
+        .connection-arrow {
+            position: absolute;
+            width: 3vw;
+            height: 0.2vh;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            top: 50%;
+            right: -3vw;
+            transform: translateY(-50%);
+        }
+
+        .connection-arrow::after {
+            content: '';
+            position: absolute;
+            right: -0.5vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 0.5vw solid var(--accent-color);
+            border-top: 0.5vw solid transparent;
+            border-bottom: 0.5vw solid transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <!-- 第1页：标题页 -->
+        <div id="slide1" class="slide">
+            <div class="slide-content key-content">
+                <h1 class="animated">Very Deep Research</h1>
+                <div class="title-separator animated"></div>
+                <p class="subtitle animated">垂直私域数据研究工具框架 - 让AI深度研究触达专业数据</p>
+            </div>
+
+            <div class="bottom-section animated">
+                <div class="contact">
+                    <p>演示文稿</p>
+                    <p><span class="contact-item"><iconify-icon icon="mdi:web"></iconify-icon> 测试版本已上线</span></p>
+                </div>
+                <div class="copyright">
+                    <p>© 2025 Very Deep Research. 保密文件，请勿外传。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第2页：问题与解决方案（合并） -->
+        <div id="slide2" class="slide">
+            <div class="slide-content">
+                <div class="problem-solution-container">
+                    <h2 class="ppt-title animated">问题与解决方案</h2>
+                    
+                    <div class="problems-section animated">
+                        <div class="problem-card">
+                            <h3>数据来源单一</h3>
+                            <p>传统AI研究工具主要依赖公开网络搜索，无法触及企业私域数据、专业数据库等高价值信息源。</p>
+                        </div>
+                        <div class="problem-card">
+                            <h3>垂直领域适配性差</h3>
+                            <p>通用研究工具难以满足特定行业的专业需求，如招商引资、产业链分析等场景需要定制化能力。</p>
+                        </div>
+                        <div class="problem-card">
+                            <h3>数据孤岛问题</h3>
+                            <p>企业内部数据、行业数据库、本地文件等多源异构数据难以整合，研究效率低下。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="solution-section">
+                        <p class="solution-subtitle animated">构建可扩展的垂直数据研究框架，让AI深度研究能力延伸至专业领域</p>
+                        
+                        <div class="architecture-diagram animated">
+                            <div class="arch-layer">
+                                <div class="arch-box">
+                                    <iconify-icon class="arch-icon" icon="mdi:brain"></iconify-icon>
+                                    <div class="arch-title">Deep Research Core</div>
+                                    <div class="arch-desc">深度思考、规划和迭代式信息查找</div>
+                                </div>
+                            </div>
+                            <div class="arch-layer">
+                                <div class="arch-box web">
+                                    <iconify-icon class="arch-icon web" icon="mdi:web"></iconify-icon>
+                                    <div class="arch-title">Web Search</div>
+                                    <div class="arch-desc">公开网络数据</div>
+                                </div>
+                                <div class="arch-box database">
+                                    <iconify-icon class="arch-icon database" icon="mdi:database"></iconify-icon>
+                                    <div class="arch-title">专用数据库</div>
+                                    <div class="arch-desc">垂直行业数据</div>
+                                </div>
+                                <div class="arch-box file">
+                                    <iconify-icon class="arch-icon file" icon="mdi:file-document"></iconify-icon>
+                                    <div class="arch-title">本地文件</div>
+                                    <div class="arch-desc">企业内部资料</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第3页：核心特性 -->
+        <div id="slide3" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">三大核心架构特性</h2>
+                
+                <div class="feature-grid">
+                    <div class="feature-card animated">
+                        <div class="feature-number">01</div>
+                        <div class="feature-title">沿用Deep Research主流程</div>
+                        <div class="feature-desc">保留深度思考、规划和迭代式信息查找的核心能力，确保研究质量和深度。经过验证的研究方法论，适用于复杂问题的系统性分析。</div>
+                    </div>
+                    
+                    <div class="feature-card animated">
+                        <div class="feature-number">02</div>
+                        <div class="feature-title">丰富的数据接入能力</div>
+                        <div class="feature-desc">除Web Search外，实现专用数据库接入范式，支持结构化和非结构化数据。规划本地文件接入，打通企业数据孤岛。</div>
+                    </div>
+                    
+                    <div class="feature-card animated">
+                        <div class="feature-number">03</div>
+                        <div class="feature-title">解耦式可扩展架构</div>
+                        <div class="feature-desc">主流程与数据接入工具解耦，通过定制数据接入工具，快速实现不同垂直领域的deep research agent。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第4页：实际案例（包含试用链接） -->
+        <div id="slide4" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">实际应用案例</h2>
+                
+                <div class="case-container">
+                    <div class="case-info animated">
+                        <span class="case-tag">招商引资数据AI</span>
+                        <h3 style="font-size: 2.5vw; color: var(--text-primary); margin: 1vh 0;">智能化产业链分析与企业挖掘</h3>
+                        
+                        <div class="case-detail">
+                            <h4 style="color: var(--accent-light); font-size: 1.5vw; margin-bottom: 1vh;">应用场景</h4>
+                            <p style="font-size: 1.3vw;">给定领域方向和意向公司，自动调研市场现状、梳理产业链关系、挖掘潜在合作企业。</p>
+                        </div>
+                        
+                        <div class="case-detail">
+                            <h4 style="color: var(--accent-light); font-size: 1.5vw; margin-bottom: 1vh;">数据源整合</h4>
+                            <p style="font-size: 1.3vw;">• Web Search：行业动态、政策信息<br>• 非上市公司数据库：企业工商信息、财务数据<br>• 产业链数据：上下游关系图谱</p>
+                        </div>
+                    </div>
+                    
+                    <div class="case-link-box animated">
+                        <iconify-icon style="font-size: 5vw; color: var(--primary-light); margin-bottom: 2vh;" icon="mdi:test-tube"></iconify-icon>
+                        <h3>立即体验</h3>
+                        <p style="font-size: 1.3vw; color: var(--text-secondary); margin-bottom: 2vh;">测试我们的垂直数据研究工具</p>
+                        <a href="http://113.44.72.114:8501/" target="_blank">访问测试链接</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第5页：Domain DB Agent Arch -->
+        <div id="slide5" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">Domain DB Agent Arch</h2>
+                
+                <div class="domain-arch-container">
+                    <div class="agent-architecture animated">
+                        <div class="master-agent-box">
+                            <div class="agent-content">
+                                <iconify-icon class="agent-icon" icon="mdi:robot" style="color: var(--primary-light);"></iconify-icon>
+                                <h3>Master Data Agent</h3>
+                                <p>通用数据理解Agent，负责构造垂直Domain Agent</p>
+                                <div class="io-section">
+                                    <div class="io-item">
+                                        <span class="io-label">输入:</span>
+                                        <span class="io-desc">整个数据库（库表、文档、系统使用样例）</span>
+                                    </div>
+                                    <div class="io-item">
+                                        <span class="io-label">输出:</span>
+                                        <span class="io-desc">标准介绍文档，补充到Domain Agent的context</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="connection-arrow"></div>
+                        </div>
+                        
+                        <div class="student-agents-box">
+                            <div class="student-agent-card">
+                                <iconify-icon class="agent-icon" icon="mdi:domain" style="color: var(--accent-light);"></iconify-icon>
+                                <div class="agent-content">
+                                    <h3>Domain (Student) Agent</h3>
+                                    <p>场景垂直专用的数据查询工具</p>
+                                    <div class="io-section">
+                                        <div class="io-item">
+                                            <span class="io-label">输入:</span>
+                                            <span class="io-desc">自然语言问题</span>
+                                        </div>
+                                        <div class="io-item">
+                                            <span class="io-label">输出:</span>
+                                            <span class="io-desc">查询/分析的数据（结构化表格或无结构文本）</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="student-agent-card">
+                                <iconify-icon class="agent-icon" icon="mdi:factory" style="color: var(--accent-light);"></iconify-icon>
+                                <div class="agent-content">
+                                    <h3>示例：企业数据查询Agent</h3>
+                                    <p>非上市公司企业数据查询Agent，支持工商信息、财务数据等专业查询</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dev-roadmap animated">
+                        <div class="roadmap-step" data-step="Step 1">
+                            <h4>人工构造垂直Domain Agent</h4>
+                            <p>人工构造可用的垂直Domain数据Agent，接入Deep Research Agent，快速验证价值并服务特定场景。</p>
+                        </div>
+                        
+                        <div class="roadmap-step" data-step="Step 2">
+                            <h4>构造通用Master Agent</h4>
+                            <p>构造和迭代Master Agent，形成通用能力，AI-native地接入任何结构化数据系统，实现自动化扩展。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-nav">
+        <div class="slide-dots"></div>
+    </div>
+    <div class="slide-arrow prev">◀</div>
+    <div class="slide-arrow next">▶</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slideContainer = document.querySelector('.slide-container');
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelector('.slide-dots');
+            const prevBtn = document.querySelector('.slide-arrow.prev');
+            const nextBtn = document.querySelector('.slide-arrow.next');
+            let currentSlide = 0;
+            
+            // 创建导航点
+            slides.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.classList.add('slide-dot');
+                if (index === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => scrollToSlide(index));
+                dots.appendChild(dot);
+            });
+
+            // 更新活动导航点
+            function updateActiveDot() {
+                document.querySelectorAll('.slide-dot').forEach((dot, index) => {
+                    if (index === currentSlide) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            }
+
+            // 滚动到指定幻灯片
+            function scrollToSlide(index) {
+                if (index < 0) index = 0;
+                if (index >= slides.length) index = slides.length - 1;
+                
+                currentSlide = index;
+                slides[index].scrollIntoView({ behavior: 'smooth' });
+                updateActiveDot();
+            }
+
+            // 滚动事件监听
+            slideContainer.addEventListener('scroll', function() {
+                requestAnimationFrame(() => {
+                    const scrollPosition = slideContainer.scrollTop;
+                    const windowHeight = window.innerHeight;
+                    
+                    let activeIndex = 0;
+                    slides.forEach((slide, index) => {
+                        const slideTop = slide.offsetTop;
+                        if (scrollPosition >= slideTop - windowHeight / 2) {
+                            activeIndex = index;
+                        }
+                    });
+                    
+                    if (currentSlide !== activeIndex) {
+                        currentSlide = activeIndex;
+                        updateActiveDot();
+                    }
+                });
+            });
+
+            // 上一页/下一页按钮
+            prevBtn.addEventListener('click', () => scrollToSlide(currentSlide - 1));
+            nextBtn.addEventListener('click', () => scrollToSlide(currentSlide + 1));
+
+            // 键盘控制
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                    scrollToSlide(currentSlide + 1);
+                } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                    scrollToSlide(currentSlide - 1);
+                }
+            });
+
+            // 触摸滑动支持
+            let touchStartY = 0;
+            
+            document.addEventListener('touchstart', function(e) {
+                touchStartY = e.touches[0].clientY;
+            }, false);
+            
+            document.addEventListener('touchend', function(e) {
+                const touchEndY = e.changedTouches[0].clientY;
+                const yDiff = touchStartY - touchEndY;
+                
+                if (Math.abs(yDiff) > 50) {
+                    if (yDiff > 0) {
+                        scrollToSlide(currentSlide + 1);
+                    } else {
+                        scrollToSlide(currentSlide - 1);
+                    }
+                }
+            }, false);
+        });
+    </script>
+</body>
+</html>
