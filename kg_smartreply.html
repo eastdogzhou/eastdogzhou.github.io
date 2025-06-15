@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no">
+    <title>KG+SmartReply潜在数据用例</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <style>
+        :root {
+            --bg-pattern: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            
+            /* 主色调 - 清新淡蓝色系 */
+            --primary-color: #5BA3F5;
+            --primary-light: #7BB6F8;
+            --primary-dark: #3A8EF2;
+            
+            /* 辅助色 - 温暖天蓝色 */
+            --secondary-color: #64B5F6;
+            --secondary-light: #90CAF9;
+            --secondary-dark: #42A5F5;
+            
+            /* 强调色 - 清新青色 */
+            --accent-color: #4DD0E1;
+            --accent-light: #80DEEA;
+            --accent-dark: #26C6DA;
+            
+            /* 背景色系 - 明亮浅色系 */
+            --bg-main: #F5F9FF;
+            --bg-card: #FFFFFF;
+            --bg-card-hover: #F0F7FF;
+            --bg-accent: #E8F4FD;
+            
+            /* 文本色系 - 深色对比 */
+            --text-primary: #1A3B5C;
+            --text-secondary: #4A6B8A;
+            --text-muted: #7A92AA;
+            --text-hint: #A0B4C8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 0.5vw;
+            height: 0.5vw;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(91, 163, 245, 0.1);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(91, 163, 245, 0.3);
+            border-radius: 0.5vw;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(91, 163, 245, 0.5);
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow-x: hidden;
+            background-image: linear-gradient(to bottom right, rgba(245, 249, 255, 0.9), rgba(232, 244, 253, 0.95));
+        }
+
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            position: relative;
+        }
+
+        /* 基础幻灯片样式 */
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-main);
+            position: relative;
+        }
+
+        /* 装饰背景纹理 */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-image: var(--bg-pattern);
+            opacity: 0.5;
+            z-index: 0;
+        }
+
+        /* 幻灯片内容区域 */
+        .slide-content {
+            padding: 5vh 5vw;
+            width: 90vw;
+            max-width: 90vw;
+            margin-left: auto;
+            margin-right: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+            z-index: 1;
+            overflow-y: auto;
+        }
+
+        /* 确保关键内容在视觉黄金分割点 */
+        .key-content {
+            padding-top: 30vh;
+        }
+
+        /* PPT 标题样式 */
+        .ppt-title {
+            font-size: 3.5vw;
+            line-height: 1.2;
+            font-weight: 800;
+            margin-bottom: 3vh;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0.2vh 1vh rgba(91, 163, 245, 0.2);
+        }
+
+        /* PPT 副标题样式 */
+        .ppt-subtitle {
+            font-size: 1.8vw;
+            line-height: 1.3;
+            font-weight: 600;
+            margin-bottom: 3vh;
+            color: var(--text-secondary);
+        }
+
+        /* PPT 正文样式 */
+        .ppt-body {
+            font-size: 1.2vw;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        
+        .ppt-body ul {
+            list-style-type: disc;
+            padding-left: 2.5vw;
+            margin-top: 1.5vh;
+        }
+        
+        .ppt-body li {
+            margin-bottom: 1vh;
+        }
+
+        /* 幻灯片导航 */
+        .slide-nav {
+            position: fixed;
+            bottom: 3vh;
+            left: 0;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .slide-dots {
+            display: flex;
+            justify-content: center;
+            gap: 1vw;
+        }
+
+        .slide-dot {
+            width: 0.8vw;
+            height: 0.8vw;
+            border-radius: 50%;
+            background-color: rgba(91, 163, 245, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .slide-dot.active {
+            background-color: var(--primary-color);
+            transform: scale(1.2);
+            box-shadow: 0 0 1vh var(--primary-color);
+        }
+
+        .slide-arrow {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3vw;
+            height: 3vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-card);
+            color: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5vw;
+            z-index: 100;
+            transition: all 0.2s ease;
+            opacity: 0.7;
+            box-shadow: 0 0.5vh 1vh rgba(91, 163, 245, 0.1);
+        }
+
+        .slide-arrow:hover {
+            background-color: var(--primary-color);
+            color: white;
+            opacity: 1;
+            box-shadow: 0 0.5vh 1.5vh rgba(91, 163, 245, 0.3);
+        }
+
+        .slide-arrow.prev {
+            left: 2vw;
+        }
+
+        .slide-arrow.next {
+            right: 2vw;
+        }
+
+        /* 强调元素样式 */
+        .emphasis {
+            border: 0.15vw solid rgba(91, 163, 245, 0.2);
+            padding: 1.5vh 1.5vw;
+            transition: all 0.3s ease;
+            background-color: var(--bg-card);
+            box-shadow: 0 0.3vh 1vh rgba(91, 163, 245, 0.1);
+            border-radius: 0.8vw;
+        }
+
+        .emphasis:hover {
+            transform: translateY(-0.5vh);
+            box-shadow: 0 0.5vh 1.5vh rgba(91, 163, 245, 0.2);
+            background-color: var(--bg-card-hover);
+            border-color: var(--primary-light);
+        }
+
+        /* 首页特殊样式 */
+        #slide1 h1 {
+            font-size: 5vw;
+            line-height: 1.1;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 0.05em;
+            text-align: left;
+            text-shadow: 0 0.2vh 1vh rgba(91, 163, 245, 0.2);
+        }
+
+        #slide1 .title-separator {
+            width: 100%;
+            height: 0.3vh;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--secondary-color));
+            margin-top: 2vh;
+            margin-bottom: 3vh;
+            box-shadow: 0 0.2vh 0.5vh rgba(91, 163, 245, 0.2);
+        }
+
+        #slide1 .subtitle {
+            font-size: 2vw;
+            line-height: 1.2;
+            letter-spacing: 0.1vw;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+            text-align: left;
+            width: 100%;
+        }
+
+        #slide1 .bottom-section {
+            position: absolute;
+            bottom: 2vh;
+            left: 0;
+            right: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0 5vw;
+            box-sizing: border-box;
+            max-width: 90vw;
+            margin: 0 auto;
+        }
+
+        #slide1 .contact p {
+            margin: 0.5vh 0;
+            font-size: 1.2vw;
+            line-height: 1.3;
+            color: var(--text-muted);
+        }
+
+        #slide1 .contact .contact-item {
+            display: inline-block;
+            margin-right: 2vw;
+        }
+
+        #slide1 .copyright p {
+            margin: 0.5vh 0;
+            font-size: 0.9vw;
+            line-height: 1.3;
+            color: var(--text-muted);
+        }
+
+        /* 事件卡片样式 */
+        .event-card {
+            background-color: var(--bg-card);
+            border-radius: 0.8vw;
+            padding: 1.5vh 1.5vw;
+            margin-bottom: 1.5vh;
+            transition: all 0.3s ease;
+            border: 0.1vw solid rgba(91, 163, 245, 0.1);
+            box-shadow: 0 0.2vh 0.8vh rgba(91, 163, 245, 0.08);
+        }
+
+        .event-card:hover {
+            transform: translateX(0.5vw);
+            box-shadow: 0 0.5vh 1.5vh rgba(91, 163, 245, 0.15);
+            border-color: var(--primary-light);
+        }
+
+        .event-time {
+            font-size: 0.9vw;
+            color: var(--text-muted);
+            margin-bottom: 0.5vh;
+        }
+
+        .event-desc {
+            font-size: 1.1vw;
+            color: var(--text-primary);
+            margin-bottom: 0.8vh;
+            line-height: 1.5;
+        }
+
+        .event-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5vw;
+            margin-top: 0.8vh;
+        }
+
+        .keyword-tag {
+            font-size: 0.8vw;
+            padding: 0.3vh 0.8vw;
+            background-color: rgba(91, 163, 245, 0.1);
+            color: var(--primary-dark);
+            border-radius: 1vw;
+            transition: all 0.2s ease;
+        }
+
+        .keyword-tag:hover {
+            background-color: rgba(91, 163, 245, 0.2);
+            transform: scale(1.05);
+        }
+
+        .ai-opportunity {
+            margin-top: 1vh;
+            padding: 1vh 1vw;
+            background: linear-gradient(135deg, rgba(77, 208, 225, 0.08), rgba(77, 208, 225, 0.04));
+            border-left: 0.3vw solid var(--accent-color);
+            border-radius: 0.5vw;
+            font-size: 1vw;
+            color: var(--text-primary);
+        }
+
+        .ai-opportunity strong {
+            color: var(--accent-dark);
+        }
+
+        /* 分类统计样式 */
+        .stat-card {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-accent));
+            border-radius: 1vw;
+            padding: 2vh 2vw;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 0.15vw solid rgba(91, 163, 245, 0.1);
+            box-shadow: 0 0.3vh 1vh rgba(91, 163, 245, 0.08);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-0.5vh);
+            box-shadow: 0 0.5vh 1.5vh rgba(91, 163, 245, 0.15);
+            border-color: var(--primary-light);
+        }
+
+        .stat-number {
+            font-size: 3vw;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5vh;
+        }
+
+        .stat-label {
+            font-size: 1.2vw;
+            color: var(--text-secondary);
+        }
+
+        /* 人物关系卡片样式 */
+        .person-card {
+            background: linear-gradient(135deg, var(--bg-card), rgba(91, 163, 245, 0.05));
+            border-radius: 1vw;
+            padding: 2vh 2vw;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 0.15vw solid rgba(91, 163, 245, 0.15);
+            position: relative;
+            box-shadow: 0 0.3vh 1vh rgba(91, 163, 245, 0.08);
+        }
+
+        .person-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0.5vh 1.5vh rgba(91, 163, 245, 0.2);
+            border-color: var(--primary-color);
+        }
+
+        .person-name {
+            font-size: 1.5vw;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 0.5vh;
+        }
+
+        .person-role {
+            font-size: 1vw;
+            color: var(--text-secondary);
+            margin-bottom: 1vh;
+        }
+
+        .interaction-count {
+            font-size: 0.9vw;
+            color: var(--text-muted);
+        }
+
+        /* 响应式设计优化 */
+        @media (max-width: 768px) {
+            .ppt-title {
+                font-size: 6vw;
+            }
+            
+            .ppt-subtitle {
+                font-size: 3vw;
+            }
+            
+            .ppt-body {
+                font-size: 2.5vw;
+            }
+            
+            .stat-number {
+                font-size: 6vw;
+            }
+            
+            .stat-label {
+                font-size: 2.5vw;
+            }
+            
+            .event-desc {
+                font-size: 2vw;
+            }
+            
+            .keyword-tag {
+                font-size: 1.5vw;
+            }
+        }
+
+        /* 移除所有动画相关样式，但保持元素可见 */
+        .animated,
+        .fade-in,
+        .fade-in-left,
+        .fade-in-right,
+        .scale-in,
+        .delay-1,
+        .delay-2,
+        .delay-3,
+        .delay-4 {
+            opacity: 1 !important;
+            transform: none !important;
+            animation: none !important;
+            transition: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <!-- 第一页：标题页 -->
+        <div id="slide1" class="slide">
+            <div class="slide-content key-content">
+                <h1 class="animated">KG+SmartReply潜在数据用例</h1>
+                <div class="title-separator animated"></div>
+                <p class="subtitle animated" style="font-size: 1.5vw; color: var(--text-muted);">以Yuchen 为例，基于知识图谱的两周数据洞察（2025.04.23 - 2025.05.07）</p>
+            </div>
+
+            <div class="bottom-section animated">
+                <div class="contact">
+                    <p>数据来源：知识图谱系统</p>
+                    <p><span class="contact-item"><iconify-icon icon="mdi:database" style="vertical-align: -0.2em;"></iconify-icon> 事件追踪</span><span class="contact-item"><iconify-icon icon="mdi:brain" style="vertical-align: -0.2em;"></iconify-icon> Smart Reply优化辅助数据</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第二页：事件分类概览 -->
+        <div id="slide2" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">事件分类概览</h2>
+                
+                <div class="grid grid-cols-3 gap-3vw mb-4vh">
+                    <div class="stat-card">
+                        <div class="stat-number">7</div>
+                        <div class="stat-label">人际协作事件</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">10</div>
+                        <div class="stat-label">系统技术事件</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">4</div>
+                        <div class="stat-label">产品功能事件</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3vw">
+                    <div class="emphasis">
+                        <h3 style="color: var(--primary-dark); font-size: 1.5vw; margin-bottom: 1vh;"><iconify-icon icon="mdi:account-group" style="vertical-align: -0.2em;"></iconify-icon> 人际协作</h3>
+                        <div class="ppt-body">
+                            <p style="font-weight: 600; margin-bottom: 0.5vh;">主要协作对象：</p>
+                            <ul style="font-size: 1vw;">
+                                <li><strong>Junjie WU</strong> - 部署专家，负责Smart Reply生产环境发布</li>
+                                <li><strong>YuPeng YAO</strong> - 数据库专家，处理MongoDB性能优化</li>
+                                <li><strong>HuaXiang GAO</strong> - 网络专家，解决网关与连接问题</li>
+                                <li><strong>Tianqiao Chen</strong> - 管理层，认可文档组织创新想法</li>
+                            </ul>
+                            <p style="font-size: 0.9vw; margin-top: 1vh; color: var(--text-muted);">协作模式：主动求助43%、任务分配29%、想法交流28%</p>
+                        </div>
+                    </div>
+                    
+                    <div class="emphasis">
+                        <h3 style="color: var(--primary-dark); font-size: 1.5vw; margin-bottom: 1vh;"><iconify-icon icon="mdi:server-network" style="vertical-align: -0.2em;"></iconify-icon> 系统技术</h3>
+                        <div class="ppt-body">
+                            <p style="font-weight: 600; margin-bottom: 0.5vh;">核心问题域：</p>
+                            <ul style="font-size: 1vw;">
+                                <li><strong>数据库层</strong> - MongoDB慢查询、连接池耗尽</li>
+                                <li><strong>网络层</strong> - 网关超时、Nginx负载均衡异常</li>
+                                <li><strong>应用层</strong> - Smart Reply服务稳定性问题</li>
+                                <li><strong>监控层</strong> - 性能指标追踪与故障定位</li>
+                            </ul>
+                            <p style="font-size: 0.9vw; margin-top: 1vh; color: var(--text-muted);">技术栈：MongoDB、Nginx、Gateway、Docker</p>
+                        </div>
+                    </div>
+                    
+                    <div class="emphasis">
+                        <h3 style="color: var(--primary-dark); font-size: 1.5vw; margin-bottom: 1vh;"><iconify-icon icon="mdi:cube" style="vertical-align: -0.2em;"></iconify-icon> 产品功能</h3>
+                        <div class="ppt-body">
+                            <p style="font-weight: 600; margin-bottom: 0.5vh;">Smart Reply问题清单：</p>
+                            <ul style="font-size: 1vw;">
+                                <li><strong>GIF识别</strong> - 静态图被误判为动图问题</li>
+                                <li><strong>生成频率</strong> - 图片回复过于频繁影响体验</li>
+                                <li><strong>消息冲突</strong> - 语音消息被图片回复覆盖</li>
+                                <li><strong>部署流程</strong> - 修复后快速推送生产环境</li>
+                            </ul>
+                            <p style="font-size: 0.9vw; margin-top: 1vh; color: var(--text-muted);">修复周期：平均24小时内完成部署验证</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第三页：人际协作事件 -->
+        <div id="slide3" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">人际协作事件</h2>
+                
+                <div class="event-card">
+                    <div class="event-time"><iconify-icon icon="mdi:calendar" style="vertical-align: -0.2em;"></iconify-icon> 2025-04-23</div>
+                    <div class="event-desc"><strong>与Junjie WU的协作模式：</strong></div>
+                    <div class="event-desc" style="background-color: var(--bg-accent); padding: 1vh; border-radius: 0.5vw; margin: 1vh 0;">
+                        <strong>原始KG数据：</strong>"Yuchen ZANG请求Junjie WU部署Smart Reply的生产更新，修复了GIF误分类问题"。历史记录显示Junjie负责生产环境部署，响应时间通常在30分钟内，偏好简洁明确的部署需求描述。
+                    </div>
+                    <div class="ai-opportunity">
+                        <iconify-icon icon="mdi:lightbulb" style="vertical-align: -0.2em;"></iconify-icon> <strong>Smart Reply场景：</strong>当Yuchen需要部署时，系统自动生成："Hi @Junjie，需要部署Smart Reply到生产环境，版本号v2.3.1，主要修复：1)GIF误识别 2)性能优化。预计影响：无需停机。请确认部署时间窗口。"
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-time"><iconify-icon icon="mdi:calendar" style="vertical-align: -0.2em;"></iconify-icon> 2025-05-07</div>
+                    <div class="event-desc"><strong>与YuPeng YAO的协作模式：</strong></div>
+                    <div class="event-desc" style="background-color: var(--bg-accent); padding: 1vh; border-radius: 0.5vw; margin: 1vh 0;">
+                        <strong>原始KG数据：</strong>"Yuchen ZANG报告MongoDB慢查询和连接错误，YuPeng Yao主动重启服务解决"。历史显示YuPeng是MongoDB专家，偏好查看具体错误日志和性能指标，通常会深入分析根因。
+                    </div>
+                    <div class="ai-opportunity">
+                        <iconify-icon icon="mdi:lightbulb" style="vertical-align: -0.2em;"></iconify-icon> <strong>Smart Reply场景：</strong>当遇到数据库问题时，系统生成："@YuPeng 发现MongoDB异常：1)慢查询-get_room_visible_msgs超过5s 2)连接池使用率98% 3)错误码：CancelledError。已收集慢查询日志，见附件。需要你的专业建议。"
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-time"><iconify-icon icon="mdi:calendar" style="vertical-align: -0.2em;"></iconify-icon> 2025-04-26</div>
+                    <div class="event-desc"><strong>与Tianqiao Chen的交流模式：</strong></div>
+                    <div class="event-desc" style="background-color: var(--bg-accent); padding: 1vh; border-radius: 0.5vw; margin: 1vh 0;">
+                        <strong>原始KG数据：</strong>"Tianqiao Chen正在赞扬Yuchen Zang关于组织公司文档的想法"。历史显示Tianqiao是高层管理者，重视创新和效率提升，沟通风格偏向战略层面，喜欢看到量化的业务影响。
+                    </div>
+                    <div class="ai-opportunity">
+                        <iconify-icon icon="mdi:lightbulb" style="vertical-align: -0.2em;"></iconify-icon> <strong>Smart Reply场景：</strong>向管理层汇报时，系统生成："感谢您的认可！文档管理系统预计能：1)减少70%的文档查找时间 2)提升30%的知识共享效率 3)年度节省成本约50万。下一步计划构建智能知识图谱，进一步提升组织效率。"
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-time"><iconify-icon icon="mdi:calendar" style="vertical-align: -0.2em;"></iconify-icon> 2025-05-07</div>
+                    <div class="event-desc"><strong>与HuaXiang GAO的协作模式：</strong></div>
+                    <div class="event-desc" style="background-color: var(--bg-accent); padding: 1vh; border-radius: 0.5vw; margin: 1vh 0;">
+                        <strong>原始KG数据：</strong>"Yuchen ZANG怀疑网关问题并请求HuaXiang GAO帮助排查"。历史显示HuaXiang是网络专家，处理过多次网关和Nginx问题，偏好先看网络拓扑和流量监控数据。
+                    </div>
+                    <div class="ai-opportunity">
+                        <iconify-icon icon="mdi:lightbulb" style="vertical-align: -0.2em;"></iconify-icon> <strong>Smart Reply场景：</strong>请求网络支持时，系统生成："@HuaXiang 怀疑网关层面问题：1)API响应超时率升至15% 2)Nginx错误日志显示upstream timeout 3)影响服务：Smart Reply。已确认应用层正常。需要你协助检查网关配置和负载情况。"
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第四页：系统故障场景的Smart Reply优化 -->
+        <div id="slide4" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">系统技术事件</h2>
+                
+                <div class="event-card">
+                    <div class="event-time"><iconify-icon icon="mdi:calendar" style="vertical-align: -0.2em;"></iconify-icon> 2025-05-07</div>
+                    <div class="event-desc">Yuchen ZANG正在调查与MongoDB相关的慢查询时间，特别是`get_room_visible_msgs`函数，并报告了一个CancelledError。</div>
+                    <div class="event-keywords">
+                        <span class="keyword-tag">性能优化</span>
+                        <span class="keyword-tag">问题识别</span>
+                        <span class="keyword-tag">数据库调试</span>
+                    </div>
+                    <div class="ai-opportunity">
+                        <iconify-icon icon="mdi:lightbulb" style="vertical-align: -0.2em;"></iconify-icon> <strong>Smart Reply场景：</strong>当用户询问"数据库慢"时，基于历史经验自动生成："正在检查get_room_visible_msgs函数性能，可能需要优化索引或调整查询逻辑"
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-time"><iconify-icon icon="mdi:calendar" style="vertical-align: -0.2em;"></iconify-icon> 2025-05-07</div>
+                    <div class="event-desc">Yuchen ZANG报告了MongoDB查询缓慢和连接错误，促使YuPeng Yao重启服务。</div>
+                    <div class="event-keywords">
+                        <span class="keyword-tag">性能问题</span>
+                        <span class="keyword-tag">错误报告</span>
+                        <span class="keyword-tag">性能监控</span>
+                    </div>
+                    <div class="ai-opportunity">
+                        <iconify-icon icon="mdi:lightbulb" style="vertical-align: -0.2em;"></iconify-icon> <strong>Smart Reply场景：</strong>检测到"连接错误"关键词时，自动建议："已发现MongoDB连接池问题，建议联系@YuPeng进行服务重启，我会持续监控恢复状态"
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-time"><iconify-icon icon="mdi:calendar" style="vertical-align: -0.2em;"></iconify-icon> 2025-05-07</div>
+                    <div class="event-desc">Yuchen ZANG怀疑存在网关问题，并请求帮助进行调查。后续请求HuaXiang GAO帮助排查网关问题。</div>
+                    <div class="event-keywords">
+                        <span class="keyword-tag">问题识别</span>
+                        <span class="keyword-tag">系统监控</span>
+                        <span class="keyword-tag">故障排查请求</span>
+                        <span class="keyword-tag">技术支持</span>
+                    </div>
+                    <div class="ai-opportunity">
+                        <iconify-icon icon="mdi:lightbulb" style="vertical-align: -0.2em;"></iconify-icon> <strong>Smart Reply场景：</strong>识别网络问题时，生成："检测到可能的网关超时，建议：1)查看Nginx日志 2)检查网关配置 3)联系@HuaXiang协助排查"
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-time"><iconify-icon icon="mdi:calendar" style="vertical-align: -0.2em;"></iconify-icon> 2025-05-06</div>
+                    <div class="event-desc">测试环境A018出现间歇性故障，需要多次重启才能恢复正常服务。</div>
+                    <div class="event-keywords">
+                        <span class="keyword-tag">环境不稳定</span>
+                        <span class="keyword-tag">故障恢复</span>
+                        <span class="keyword-tag">测试环境</span>
+                    </div>
+                    <div class="ai-opportunity">
+                        <iconify-icon icon="mdi:lightbulb" style="vertical-align: -0.2em;"></iconify-icon> <strong>Smart Reply场景：</strong>当提到"测试环境问题"，自动回复："A018环境历史上存在稳定性问题，建议先尝试重启服务，如持续异常可切换到备用环境A019"
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第五页：产品功能迭代的Smart Reply优化 -->
+        <div id="slide5" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">产品功能事件</h2>
+                
+                <div class="event-card">
+                    <div class="event-time"><iconify-icon icon="mdi:calendar" style="vertical-align: -0.2em;"></iconify-icon> 2025-04-23</div>
+                    <div class="event-desc">Yuchen ZANG确认了智能回复图片出现频率过高并劫持语音消息的问题，并表示问题已修复。</div>
+                    <div class="event-keywords">
+                        <span class="keyword-tag">错误修复</span>
+                        <span class="keyword-tag">系统错误</span>
+                    </div>
+                    <div style="margin-top: 1vh; margin-bottom: 1vh;">→ 后续部署：</div>
+                    <div class="event-desc">Yuchen ZANG请求Junjie WU部署Smart Reply的生产更新，修复了GIF误分类问题。</div>
+                    <div class="event-keywords">
+                        <span class="keyword-tag">请求</span>
+                        <span class="keyword-tag">部署</span>
+                    </div>
+                    <div class="ai-opportunity">
+                        <iconify-icon icon="mdi:lightbulb" style="vertical-align: -0.2em;"></iconify-icon> <strong>Smart Reply场景：</strong>当讨论Smart Reply功能问题时，自动生成："已识别图片生成频率问题，修复方案：调整触发阈值+增加语音消息保护机制，预计24小时内部署"
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-time"><iconify-icon icon="mdi:calendar" style="vertical-align: -0.2em;"></iconify-icon> 2025-05-07</div>
+                    <div class="event-desc">在YuPeng Yao重启服务以解决MongoDB连接问题后，Yuchen正在测试A018以检查错误。</div>
+                    <div class="event-keywords">
+                        <span class="keyword-tag">测试</span>
+                        <span class="keyword-tag">调试</span>
+                    </div>
+                    <div class="ai-opportunity">
+                        <iconify-icon icon="mdi:lightbulb" style="vertical-align: -0.2em;"></iconify-icon> <strong>Smart Reply场景：</strong>测试验证阶段，自动提供："正在A018环境验证修复效果，测试清单：1)数据库连接稳定性 2)查询响应时间 3)并发压力测试"
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-time"><iconify-icon icon="mdi:calendar" style="vertical-align: -0.2em;"></iconify-icon> 2025-04-26</div>
+                    <div class="event-desc">Tianqiao Chen正在赞扬Yuchen Zang关于组织公司文档的想法。</div>
+                    <div class="event-keywords">
+                        <span class="keyword-tag">反馈</span>
+                        <span class="keyword-tag">想法认可</span>
+                        <span class="keyword-tag">沟通</span>
+                    </div>
+                    <div class="ai-opportunity">
+                        <iconify-icon icon="mdi:lightbulb" style="vertical-align: -0.2em;"></iconify-icon> <strong>Smart Reply场景：</strong>收到管理层认可时，生成专业回复："感谢认可！文档组织方案将分三阶段实施：1)现有文档梳理 2)建立分类体系 3)搭建知识库平台"
+                    </div>
+                </div>
+
+                <div class="event-card">
+                    <div class="event-time"><iconify-icon icon="mdi:calendar" style="vertical-align: -0.2em;"></iconify-icon> 2025-04-24</div>
+                    <div class="event-desc">Smart Reply新功能上线后，用户反馈响应速度提升30%，但仍存在个别场景识别不准确问题。</div>
+                    <div class="event-keywords">
+                        <span class="keyword-tag">用户反馈</span>
+                        <span class="keyword-tag">性能提升</span>
+                        <span class="keyword-tag">持续优化</span>
+                    </div>
+                    <div class="ai-opportunity">
+                        <iconify-icon icon="mdi:lightbulb" style="vertical-align: -0.2em;"></iconify-icon> <strong>Smart Reply场景：</strong>面对用户反馈时，自动生成："感谢反馈！性能提升30%达到预期，针对识别准确性问题，我们正在收集案例并优化算法模型"
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第六页：KG数据如何增强Smart Reply -->
+        <div id="slide6" class="slide">
+            <div class="slide-content key-content">
+                <h2 class="ppt-title animated">KG数据如何增强Smart Reply</h2>
+                
+                <div class="emphasis" style="max-width: 60vw; margin: 0 auto;">
+                    <h3 style="color: var(--primary-dark); font-size: 1.8vw; margin-bottom: 1.5vh; text-align: center;"><iconify-icon icon="mdi:robot" style="vertical-align: -0.2em;"></iconify-icon> Smart Reply增强方向</h3>
+                    <div class="ppt-body">
+                        <ul style="font-size: 1.3vw; line-height: 2;">
+                            <li><strong style="color: var(--primary-dark);">场景识别智能化</strong>：基于KG中的历史场景，帮助模型识别当前对话属于"故障排查"、"功能部署"还是"创新讨论"</li>
+                            
+                            <li><strong style="color: var(--primary-dark);">人物关系个性化</strong>：KG记录了每个协作者的专业领域、沟通风格和响应模式，Smart Reply可据此调整措辞和信息密度</li>
+                            
+                            <li><strong style="color: var(--primary-dark);">技术术语专业化</strong>：从KG提取MongoDB、Nginx、Gateway等技术栈的专业词汇，确保回复用词准确专业</li>
+                            
+                            <li><strong style="color: var(--primary-dark);">问题解决流程化</strong>：KG展示了"发现问题→诊断→寻求帮助→解决→验证"的完整链路，Smart Reply可生成符合流程的建议</li>
+                            
+                            <li><strong style="color: var(--primary-dark);">协作网络优化</strong>：基于历史协作成功率，Smart Reply能推荐最合适的专家处理特定问题</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin-top: 3vh; padding: 2vh; background: linear-gradient(135deg, rgba(91, 163, 245, 0.08), rgba(77, 208, 225, 0.08)); border-radius: 0.8vw; text-align: center;">
+                        <p style="font-size: 1.2vw; color: var(--text-secondary); margin-top: 1vh;">让每一次技术对话都更加智能、专业、高效</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-nav">
+        <div class="slide-dots"></div>
+    </div>
+    <div class="slide-arrow prev">◀</div>
+    <div class="slide-arrow next">▶</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slideContainer = document.querySelector('.slide-container');
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelector('.slide-dots');
+            const prevBtn = document.querySelector('.slide-arrow.prev');
+            const nextBtn = document.querySelector('.slide-arrow.next');
+            let currentSlide = 0;
+            
+            // 创建导航点
+            slides.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.classList.add('slide-dot');
+                if (index === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => scrollToSlide(index));
+                dots.appendChild(dot);
+            });
+
+            // 更新活动导航点
+            function updateActiveDot() {
+                document.querySelectorAll('.slide-dot').forEach((dot, index) => {
+                    if (index === currentSlide) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            }
+
+            // 简化后的滚动到指定幻灯片功能
+            function scrollToSlide(index) {
+                if (index < 0) index = 0;
+                if (index >= slides.length) index = slides.length - 1;
+                
+                currentSlide = index;
+                slides[index].scrollIntoView({ behavior: 'smooth' });
+                updateActiveDot();
+            }
+
+            // 简化的滚动事件监听
+            slideContainer.addEventListener('scroll', function() {
+                // 使用requestAnimationFrame限制事件频率
+                requestAnimationFrame(() => {
+                    const scrollPosition = slideContainer.scrollTop;
+                    const windowHeight = window.innerHeight;
+                    
+                    // 找到当前应该激活的幻灯片
+                    let activeIndex = 0;
+                    slides.forEach((slide, index) => {
+                        const slideTop = slide.offsetTop;
+                        if (scrollPosition >= slideTop - windowHeight / 2) {
+                            activeIndex = index;
+                        }
+                    });
+                    
+                    // 更新当前幻灯片索引和导航点
+                    if (currentSlide !== activeIndex) {
+                        currentSlide = activeIndex;
+                        updateActiveDot();
+                    }
+                });
+            });
+
+            // 上一页/下一页按钮
+            prevBtn.addEventListener('click', () => scrollToSlide(currentSlide - 1));
+            nextBtn.addEventListener('click', () => scrollToSlide(currentSlide + 1));
+
+            // 键盘控制
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                    scrollToSlide(currentSlide + 1);
+                } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                    scrollToSlide(currentSlide - 1);
+                }
+            });
+
+            // 触摸滑动支持
+            let touchStartY = 0;
+            
+            document.addEventListener('touchstart', function(e) {
+                touchStartY = e.touches[0].clientY;
+            }, false);
+            
+            document.addEventListener('touchend', function(e) {
+                const touchEndY = e.changedTouches[0].clientY;
+                const yDiff = touchStartY - touchEndY;
+                
+                if (Math.abs(yDiff) > 50) {
+                    if (yDiff > 0) {
+                        // 向上滑动，下一页
+                        scrollToSlide(currentSlide + 1);
+                    } else {
+                        // 向下滑动，上一页
+                        scrollToSlide(currentSlide - 1);
+                    }
+                }
+            }, false);
+        });
+    </script>
+</body>
+</html>
