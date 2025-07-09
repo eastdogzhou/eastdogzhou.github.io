@@ -390,6 +390,54 @@
             margin: 2vh 0;
         }
 
+        /* AGI阶段样式 */
+        .agi-stage {
+            display: flex;
+            align-items: center;
+            gap: 2vw;
+            padding: 1.5vh 2vw;
+            margin: 1vh 0;
+            background: linear-gradient(135deg, rgba(91, 103, 236, 0.1), transparent);
+            border-radius: 1vh;
+            transition: all 0.3s ease;
+        }
+        
+        .agi-stage:hover {
+            background: linear-gradient(135deg, rgba(91, 103, 236, 0.2), transparent);
+            transform: translateX(1vw);
+        }
+        
+        .agi-stage-number {
+            font-size: 2.5vw;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            min-width: 3vw;
+        }
+        
+        .agi-stage-content {
+            flex: 1;
+        }
+        
+        .agi-stage-title {
+            font-size: 1.6vw;
+            font-weight: 600;
+            color: var(--primary-light);
+            margin-bottom: 0.5vh;
+        }
+        
+        .agi-stage-desc {
+            font-size: 1.2vw;
+            color: var(--text-secondary);
+        }
+        
+        .current-stage {
+            border: 0.2vw solid var(--accent-light);
+            background: linear-gradient(135deg, rgba(18, 182, 168, 0.2), transparent);
+        }
+
         /* 确保所有元素可见 */
         .animated,
         .fade-in,
@@ -435,16 +483,15 @@
 
             <div class="bottom-section animated">
                 <div class="contact">
-                    <p>AI与数据科学研讨会</p>
-                    <p><span class="contact-item"><iconify-icon icon="mdi:calendar"></iconify-icon> 2025年1月</span><span class="contact-item"><iconify-icon icon="mdi:map-marker"></iconify-icon> 线上分享</span></p>
+                    <p><span class="contact-item"><iconify-icon icon="mdi:calendar"></iconify-icon> 2025年7月</span><span class="contact-item"><iconify-icon icon="mdi:map-marker"></iconify-icon> 生化所</span></p>
                 </div>
                 <div class="copyright">
-                    <p>© 2025 AI Research Lab. All Rights Reserved.</p>
+                    <p>© 2025 All Rights Reserved.</p>
                 </div>
             </div>
         </div>
 
-        <!-- Slide 2: 目录 -->
+        <!-- Slide 2: 目录（更新版） -->
         <div id="slide2" class="slide">
             <div class="slide-content">
                 <h2 class="ppt-title animated">演讲大纲</h2>
@@ -474,18 +521,12 @@
                         </ul>
                     </div>
                     <div class="emphasis animated">
-                        <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 1.5vh;">第四部分：生信分析师Agent构想</h3>
+                        <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 1.5vh;">第四部分：潜在应用方向</h3>
                         <ul style="font-size: 1.2vw;">
                             <li>单细胞数据分析Agent</li>
                             <li>多组学整合Agent</li>
-                        </ul>
-                    </div>
-                    <div class="emphasis animated" style="grid-column: 1 / -1;">
-                        <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 1.5vh;">第五部分：科研文献智能化</h3>
-                        <ul style="font-size: 1.2vw;">
-                            <li>智能检索与语义搜索</li>
-                            <li>自动总结与知识图谱</li>
-                            <li>假设生成与研究方向预测</li>
+                            <li>科研文献智能化</li>
+                            <li>AI驱动的假设生成与验证</li>
                         </ul>
                     </div>
                 </div>
@@ -685,7 +726,7 @@
         <!-- Slide 7: RLHF -->
         <div id="slide7" class="slide">
             <div class="slide-content">
-                <h2 class="ppt-title animated">阶段三：强化学习（RLHF）</h2>
+                <h2 class="ppt-title animated">阶段三：强化学习（RL）</h2>
                 <p class="ppt-subtitle animated">与人类价值对齐</p>
                 
                 <div class="emphasis animated" style="margin-bottom: 3vh;">
@@ -1000,47 +1041,58 @@
             </div>
         </div>
 
-        <!-- Slide 12: 从LLM到Agent -->
+        <!-- Slide 12: 从LLM到Agent（更新版） -->
         <div id="slide12" class="slide">
             <div class="slide-content">
-                <h2 class="ppt-title animated">从LLM到智能Agent</h2>
-                <p class="ppt-subtitle animated">让AI从"回答问题"到"解决问题"</p>
+                <h2 class="ppt-title animated">从LLM出发：通向AGI的五个阶段</h2>
+                <p class="ppt-subtitle animated">OpenAI的AGI发展路线图</p>
                 
-                <div class="grid grid-cols-2 gap-8">
-                    <div>
-                        <div class="emphasis animated">
-                            <h3 style="color: var(--secondary-light); font-size: 2vw; margin-bottom: 2vh;">传统LLM的局限</h3>
-                            <ul style="font-size: 1.3vw;">
-                                <li>知识截止于训练时间</li>
-                                <li>无法访问实时数据</li>
-                                <li>缺乏工具使用能力</li>
-                                <li>单次回答，无法迭代</li>
-                            </ul>
+                <div style="max-width: 70vw; margin: 0 auto;">
+                    <div class="agi-stage animated">
+                        <div class="agi-stage-number">1</div>
+                        <div class="agi-stage-content">
+                            <div class="agi-stage-title">Chatbots 对话机器人</div>
+                            <div class="agi-stage-desc">当前阶段 - ChatGPT、Claude等，能进行自然对话和简单任务</div>
                         </div>
                     </div>
-                    <div>
-                        <div class="emphasis animated">
-                            <h3 style="color: var(--accent-light); font-size: 2vw; margin-bottom: 2vh;">Agent的突破</h3>
-                            <ul style="font-size: 1.3vw;">
-                                <li>实时检索外部知识</li>
-                                <li>主动调用各种工具</li>
-                                <li>多步推理和规划</li>
-                                <li>自主探索和验证</li>
-                            </ul>
+                    
+                    <div class="agi-stage animated">
+                        <div class="agi-stage-number">2</div>
+                        <div class="agi-stage-content">
+                            <div class="agi-stage-title">Reasoners 推理者</div>
+                            <div class="agi-stage-desc">人类水平的问题解决能力，能进行复杂推理和规划</div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="code-block animated" style="margin-top: 4vh; font-size: 1.4vw;">
-                    <p style="color: var(--text-muted); margin-bottom: 1vh;">// Agent工作流程示例</p>
-                    <p>用户: "分析这个基因在不同癌症中的表达"</p>
-                    <p style="color: var(--accent-light); margin-top: 1vh;">Agent工作流程:</p>
-                    <p>[理解意图] → [查询数据库] → [统计分析] → [文献检索] → [生成报告]</p>
+                    
+                    <div class="agi-stage current-stage animated">
+                        <div class="agi-stage-number">3</div>
+                        <div class="agi-stage-content">
+                            <div class="agi-stage-title">Agents 智能体</div>
+                            <div class="agi-stage-desc">能够代表用户采取行动，自主完成复杂任务</div>
+                        </div>
+                    </div>
+                    
+                    <div class="agi-stage animated">
+                        <div class="agi-stage-number">4</div>
+                        <div class="agi-stage-content">
+                            <div class="agi-stage-title">Innovators 创新者</div>
+                            <div class="agi-stage-desc">协助进行发明创造，推动科学技术进步</div>
+                        </div>
+                    </div>
+                    
+                    <div class="agi-stage animated">
+                        <div class="agi-stage-number">5</div>
+                        <div class="agi-stage-content">
+                            <div class="agi-stage-title">Organizations 组织</div>
+                            <div class="agi-stage-desc">能够完成整个组织的工作，相当于一个完整的公司或研究机构</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="highlight-box animated" style="margin-top: 3vh;">
-                    <p style="font-size: 1.6vw; text-align: center; color: var(--primary-light);">
-                        Agent = LLM + 工具使用 + 规划能力 + 记忆系统
+                    <p style="font-size: 1.4vw; text-align: center; color: var(--primary-light);">
+                        我们正处于从Level 2向Level 3过渡的关键时期<br>
+                        <span style="color: var(--accent-light);">Agent = LLM + 工具使用 + 规划能力 + 记忆系统</span>
                     </p>
                 </div>
             </div>
@@ -1215,7 +1267,7 @@
         <!-- Slide 16: 中国移动案例详情 -->
         <div id="slide16" class="slide">
             <div class="slide-content">
-                <h2 class="ppt-title animated">实战案例：中国移动换机预警</h2>
+                <h2 class="ppt-title animated">案例：运营商换机预警</h2>
                 
                 <div class="highlight-box animated" style="margin-bottom: 3vh;">
                     <h3 style="color: var(--primary-light); font-size: 1.8vw;">背景：预测客户流失的挑战</h3>
@@ -1266,7 +1318,7 @@
                             <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 1vh;">实际成果</h3>
                             <div style="display: flex; justify-content: space-around; margin-top: 2vh;">
                                 <div style="text-align: center;">
-                                    <p class="big-number" style="font-size: 4vw;">20%+</p>
+                                    <p class="big-number" style="font-size: 4vw;">50%->70%</p>
                                     <p style="font-size: 1.2vw;">预测准确率提升</p>
                                 </div>
                                 <div style="text-align: center;">
@@ -1283,7 +1335,7 @@
         <!-- Slide 17: Agent工作流程 -->
         <div id="slide17" class="slide">
             <div class="slide-content">
-                <h2 class="ppt-title animated">AI Agent的工作流程</h2>
+                <h2 class="ppt-title animated">Data Agent的工作流程</h2>
                 
                 <div class="grid grid-cols-3 gap-6">
                     <div class="emphasis animated">
@@ -1331,7 +1383,7 @@
         <!-- Slide 18: 数据Agent核心能力 -->
         <div id="slide18" class="slide">
             <div class="slide-content">
-                <h2 class="ppt-title animated">数据Agent的核心能力</h2>
+                <h2 class="ppt-title animated">Data Agent的核心能力</h2>
                 
                 <div class="grid grid-cols-3 gap-6">
                     <div class="emphasis animated">
@@ -1756,8 +1808,7 @@
                 
                 <div style="text-align: center; margin-top: 6vh;">
                     <p style="font-size: 1.5vw; color: var(--text-muted);">
-                        <iconify-icon icon="mdi:email"></iconify-icon> contact@airesearch.lab<br>
-                        <iconify-icon icon="mdi:github"></iconify-icon> github.com/airesearchlab
+                        <iconify-icon icon="mdi:email"></iconify-icon> yudongzhou@yeah.net<br>
                     </p>
                 </div>
             </div>
