@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no">
+    <title>大模型与Data Agent：探索AI赋能数据分析新范式</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <style>
+        :root {
+            --bg-pattern: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            
+            /* 主色调 - 高端蓝紫色调 */
+            --primary-color: #5B67EC;
+            --primary-light: #8A94F8;
+            --primary-dark: #3A46C8;
+            
+            /* 辅助色 - 温暖橙色调 */
+            --secondary-color: #FF6B6B;
+            --secondary-light: #FF9E9E;
+            --secondary-dark: #E04444;
+            
+            /* 强调色 - 清新绿松石色 */
+            --accent-color: #12B6A8;
+            --accent-light: #4ED8CC;
+            --accent-dark: #0A8C82;
+            
+            /* 背景色系 - 优雅深色系 */
+            --bg-dark: #101522;
+            --bg-card: #1A2035;
+            --bg-card-hover: #232A40;
+            --bg-accent: #131B2E;
+            
+            /* 文本色系 - 清晰分层 */
+            --text-primary: #F0F3FF;
+            --text-secondary: #C9D0E8;
+            --text-muted: #8E99BC;
+            --text-hint: #5D6A96;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 0.5vw;
+            height: 0.5vw;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(26, 32, 53, 0.5);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(91, 103, 236, 0.5);
+            border-radius: 0.5vw;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(91, 103, 236, 0.8);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow-x: hidden;
+            background-image: linear-gradient(to bottom right, rgba(19, 27, 46, 0.7), rgba(16, 21, 34, 0.9));
+        }
+
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            position: relative;
+        }
+
+        /* 基础幻灯片样式 */
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            scroll-snap-align: start;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background-color: #121212;
+            position: relative;
+        }
+
+        /* 装饰背景纹理 */
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-image: var(--bg-pattern);
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        /* 幻灯片内容区域 */
+        .slide-content {
+            padding: 5vh 5vw;
+            width: 90vw;
+            max-width: 90vw;
+            margin-left: auto;
+            margin-right: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+            z-index: 1;
+            overflow-y: auto;
+        }
+
+        /* 确保关键内容在视觉黄金分割点 */
+        .key-content {
+            padding-top: 30vh;
+        }
+
+        /* PPT 标题样式 */
+        .ppt-title {
+            font-size: 4.5vw;
+            line-height: 1.2;
+            font-weight: 800;
+            margin-bottom: 4vh;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0.2vh 2vh rgba(91, 103, 236, 0.2);
+        }
+
+        /* PPT 副标题样式 */
+        .ppt-subtitle {
+            font-size: 2.2vw;
+            line-height: 1.3;
+            font-weight: 600;
+            margin-bottom: 3vh;
+            color: var(--text-secondary);
+        }
+
+        /* PPT 正文样式 */
+        .ppt-body {
+            font-size: 1.4vw;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        
+        .ppt-body ul {
+            list-style-type: disc;
+            padding-left: 2.5vw;
+            margin-top: 1.5vh;
+        }
+        
+        .ppt-body li {
+            margin-bottom: 1vh;
+        }
+
+        /* 幻灯片导航 */
+        .slide-nav {
+            position: fixed;
+            bottom: 3vh;
+            left: 0;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .slide-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.8vw;
+            flex-wrap: wrap;
+            max-width: 80vw;
+        }
+
+        .slide-dot {
+            width: 0.8vw;
+            height: 0.8vw;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .slide-dot.active {
+            background-color: var(--primary-light);
+            transform: scale(1.2);
+            box-shadow: 0 0 1vh var(--primary-light);
+        }
+
+        .slide-arrow {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3.5vw;
+            height: 3.5vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.8vw;
+            z-index: 100;
+            transition: all 0.2s ease;
+            opacity: 0.5;
+            box-shadow: 0 0.5vh 1vh rgba(0, 0, 0, 0.3);
+        }
+
+        .slide-arrow:hover {
+            background-color: var(--primary-color);
+            opacity: 1;
+            box-shadow: 0 0.5vh 1.5vh rgba(91, 103, 236, 0.5);
+        }
+
+        .slide-arrow.prev {
+            left: 2vw;
+        }
+
+        .slide-arrow.next {
+            right: 2vw;
+        }
+
+        /* 强调元素样式 */
+        .emphasis {
+            border: 0.2vw solid transparent;
+            border-image: linear-gradient(45deg, var(--primary-light), var(--accent-light)) 1;
+            padding: 2vh 2vw;
+            transition: all 0.3s ease;
+            background-color: var(--bg-card);
+            box-shadow: 0 0.5vh 1.5vh rgba(0, 0, 0, 0.2);
+            border-radius: 1vh;
+        }
+
+        .emphasis:hover {
+            transform: translateY(-0.5vh);
+            box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.3), 0 0 0 0.1vh var(--primary-light);
+            background-color: var(--bg-card-hover);
+        }
+
+        /* 首页特殊样式 */
+        #slide1 h1 {
+            font-size: 6vw;
+            line-height: 1.1;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 0.1em;
+            text-align: left;
+            text-shadow: 0 0.2vh 2vh rgba(91, 103, 236, 0.3);
+        }
+
+        #slide1 .title-separator {
+            width: 100%;
+            height: 0.3vh;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--secondary-color));
+            margin-top: 2vh;
+            margin-bottom: 3vh;
+            box-shadow: 0 0.2vh 1vh rgba(91, 103, 236, 0.3);
+        }
+
+        #slide1 .subtitle {
+            font-size: 2.2vw;
+            line-height: 1.2;
+            letter-spacing: 0.3vw;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0;
+            text-align: left;
+            width: 100%;
+        }
+
+        #slide1 .bottom-section {
+            position: absolute;
+            bottom: 2vh;
+            left: 0;
+            right: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0 5vw;
+            box-sizing: border-box;
+            max-width: 90vw;
+            margin: 0 auto;
+        }
+
+        #slide1 .contact p {
+            margin: 0.5vh 0;
+            font-size: 1.2vw;
+            line-height: 1.3;
+            color: var(--text-muted);
+        }
+
+        #slide1 .contact .contact-item {
+            display: inline-block;
+            margin-right: 2vw;
+        }
+
+        #slide1 .copyright p {
+            margin: 0.5vh 0;
+            font-size: 0.9vw;
+            line-height: 1.3;
+            color: var(--text-muted);
+        }
+
+        /* 特殊样式 */
+        .code-block {
+            background-color: var(--bg-accent);
+            padding: 2vh 2vw;
+            border-radius: 1vh;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2vw;
+            overflow-x: auto;
+            border: 0.1vh solid var(--primary-dark);
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(91, 103, 236, 0.1), rgba(18, 182, 168, 0.1));
+            border-left: 0.5vw solid var(--primary-color);
+            padding: 2vh 2vw;
+            margin: 2vh 0;
+            border-radius: 0.5vh;
+        }
+
+        .icon-feature {
+            display: flex;
+            align-items: center;
+            gap: 1vw;
+            margin: 1vh 0;
+        }
+
+        .icon-feature iconify-icon {
+            font-size: 2vw;
+            color: var(--accent-light);
+        }
+
+        /* 表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2vh 0;
+        }
+
+        .data-table th {
+            background-color: var(--bg-card);
+            color: var(--primary-light);
+            padding: 1vh 1vw;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1.2vw;
+        }
+
+        .data-table td {
+            padding: 1vh 1vw;
+            border-bottom: 0.1vh solid var(--bg-card);
+            font-size: 1.1vw;
+        }
+
+        .data-table tr:hover {
+            background-color: rgba(91, 103, 236, 0.05);
+        }
+
+        /* 数字强调样式 */
+        .big-number {
+            font-size: 8vw;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0.5vh 2vh rgba(91, 103, 236, 0.3);
+            line-height: 1;
+            margin: 2vh 0;
+        }
+
+        /* 确保所有元素可见 */
+        .animated,
+        .fade-in,
+        .fade-in-left,
+        .fade-in-right,
+        .scale-in,
+        .delay-1,
+        .delay-2,
+        .delay-3,
+        .delay-4 {
+            opacity: 1 !important;
+            transform: none !important;
+            animation: none !important;
+            transition: none !important;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .ppt-title {
+                font-size: 6vw;
+            }
+            .ppt-subtitle {
+                font-size: 3vw;
+            }
+            .ppt-body {
+                font-size: 2vw;
+            }
+            .data-table th, .data-table td {
+                font-size: 1.8vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <!-- Slide 1: 标题页 -->
+        <div id="slide1" class="slide">
+            <div class="slide-content key-content">
+                <h1 class="animated">大模型与Data Agent</h1>
+                <div class="title-separator animated"></div>
+                <p class="subtitle animated">探索AI赋能数据分析新范式</p>
+            </div>
+
+            <div class="bottom-section animated">
+                <div class="contact">
+                    <p>AI与数据科学研讨会</p>
+                    <p><span class="contact-item"><iconify-icon icon="mdi:calendar"></iconify-icon> 2025年1月</span><span class="contact-item"><iconify-icon icon="mdi:map-marker"></iconify-icon> 线上分享</span></p>
+                </div>
+                <div class="copyright">
+                    <p>© 2025 AI Research Lab. All Rights Reserved.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: 目录 -->
+        <div id="slide2" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">演讲大纲</h2>
+                <div class="ppt-body grid grid-cols-2 gap-6">
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 1.5vh;">第一部分：大语言模型基础认知</h3>
+                        <ul style="font-size: 1.2vw;">
+                            <li>什么是大语言模型</li>
+                            <li>LLM是如何炼成的</li>
+                            <li>核心能力与边界</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 1.5vh;">第二部分：从LLM到智能Agent</h3>
+                        <ul style="font-size: 1.2vw;">
+                            <li>RAG：让AI接入外部知识</li>
+                            <li>Deep Research：从查询到研究</li>
+                            <li>AI+BI：数据分析的智能化革命</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 1.5vh;">第三部分：AI+BI实战案例</h3>
+                        <ul style="font-size: 1.2vw;">
+                            <li>中国移动换机预警案例</li>
+                            <li>数据Agent的核心能力</li>
+                            <li>从电信到生信：能力迁移</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 1.5vh;">第四部分：生信分析师Agent构想</h3>
+                        <ul style="font-size: 1.2vw;">
+                            <li>单细胞数据分析Agent</li>
+                            <li>多组学整合Agent</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated" style="grid-column: 1 / -1;">
+                        <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 1.5vh;">第五部分：科研文献智能化</h3>
+                        <ul style="font-size: 1.2vw;">
+                            <li>智能检索与语义搜索</li>
+                            <li>自动总结与知识图谱</li>
+                            <li>假设生成与研究方向预测</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: LLM的本质 -->
+        <div id="slide3" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">LLM的本质：两个文件的故事</h2>
+                
+                <div class="grid grid-cols-2 gap-8">
+                    <div class="emphasis animated">
+                        <div class="icon-feature">
+                            <iconify-icon icon="mdi:file-document" style="font-size: 3vw;"></iconify-icon>
+                            <div>
+                                <h3 style="color: var(--primary-light); font-size: 1.8vw;">参数文件</h3>
+                                <p class="big-number">140GB</p>
+                            </div>
+                        </div>
+                        <p style="font-size: 1.3vw; margin-top: 2vh;">
+                            存储了<strong>700亿个数字</strong><br>
+                            这些数字编码了模型学到的所有知识
+                        </p>
+                    </div>
+                    <div class="emphasis animated">
+                        <div class="icon-feature">
+                            <iconify-icon icon="mdi:code-braces" style="font-size: 3vw;"></iconify-icon>
+                            <div>
+                                <h3 style="color: var(--primary-light); font-size: 1.8vw;">运行代码</h3>
+                                <p class="big-number">500行</p>
+                            </div>
+                        </div>
+                        <p style="font-size: 1.3vw; margin-top: 2vh;">
+                            纯C代码<br>
+                            告诉计算机如何使用这些数字来生成回答
+                        </p>
+                    </div>
+                </div>
+
+                <div class="highlight-box animated" style="margin-top: 4vh;">
+                    <p style="font-size: 1.8vw; font-weight: 600; color: var(--accent-light); text-align: center;">
+                        10TB文本 → 140GB参数<br>
+                        <span style="font-size: 3vw;">压缩比 100:1</span>
+                    </p>
+                    <p style="font-size: 1.3vw; text-align: center; margin-top: 1vh;">
+                        将整个互联网的知识"压缩"到一个硬盘里
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: 从文本预测到知识理解 -->
+        <div id="slide4" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">从文本预测到知识理解</h2>
+                <p class="ppt-subtitle animated">看似简单的任务，蕴含深刻的学习</p>
+                
+                <div class="code-block animated" style="font-size: 1.4vw;">
+                    <p style="color: var(--text-muted); margin-bottom: 1vh;">// 训练任务：预测下一个词</p>
+                    <p>输入: "中国的首都是___"</p>
+                    <p>模型学会: 填"北京"</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-6" style="margin-top: 4vh;">
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--secondary-light); font-size: 1.6vw; margin-bottom: 1vh;">
+                            <iconify-icon icon="mdi:translate"></iconify-icon> 语言规律
+                        </h3>
+                        <ul style="font-size: 1.2vw;">
+                            <li>语法结构</li>
+                            <li>词汇搭配</li>
+                            <li>语义关系</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--primary-light); font-size: 1.6vw; margin-bottom: 1vh;">
+                            <iconify-icon icon="mdi:book-open"></iconify-icon> 事实知识
+                        </h3>
+                        <ul style="font-size: 1.2vw;">
+                            <li>地理历史</li>
+                            <li>科学常识</li>
+                            <li>专业知识</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--accent-light); font-size: 1.6vw; margin-bottom: 1vh;">
+                            <iconify-icon icon="mdi:brain"></iconify-icon> 推理能力
+                        </h3>
+                        <ul style="font-size: 1.2vw;">
+                            <li>因果关系</li>
+                            <li>逻辑推导</li>
+                            <li>模式识别</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="highlight-box animated" style="margin-top: 4vh;">
+                    <h3 style="color: var(--primary-light); font-size: 1.8vw;">生物信息学场景举例</h3>
+                    <p style="font-size: 1.3vw; margin-top: 1vh;">
+                        <strong>传统方法：</strong>写SQL查询特定基因在不同组织的表达量<br>
+                        <strong>LLM方法：</strong>"帮我分析BRCA1基因在不同癌症类型中的表达模式，并解释其生物学意义"
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: 预训练阶段 -->
+        <div id="slide5" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">阶段一：预训练（Pre-training）</h2>
+                <p class="ppt-subtitle animated">知识的获取 - 规模令人震撼的工程</p>
+                
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <div class="emphasis animated">
+                            <h3 style="color: var(--primary-light); font-size: 1.8vw; margin-bottom: 2vh;">训练规模</h3>
+                            <div class="icon-feature">
+                                <iconify-icon icon="mdi:database" style="font-size: 2.5vw;"></iconify-icon>
+                                <p style="font-size: 1.3vw;"><strong>数据量：</strong>约10TB文本<br>相当于1000万本书</p>
+                            </div>
+                            <div class="icon-feature">
+                                <iconify-icon icon="mdi:gpu" style="font-size: 2.5vw;"></iconify-icon>
+                                <p style="font-size: 1.3vw;"><strong>计算资源：</strong>6000个GPU × 12天</p>
+                            </div>
+                            <div class="icon-feature">
+                                <iconify-icon icon="mdi:currency-usd" style="font-size: 2.5vw;"></iconify-icon>
+                                <p style="font-size: 1.3vw;"><strong>成本：</strong>约200万美元<br>最先进模型可能需要上亿美元</p>
+                            </div>
+                            <div class="icon-feature">
+                                <iconify-icon icon="mdi:memory" style="font-size: 2.5vw;"></iconify-icon>
+                                <p style="font-size: 1.3vw;"><strong>参数量：</strong>700亿个参数<br>(Llama 2 70B)</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="emphasis animated">
+                            <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 2vh;">预训练的本质</h3>
+                            <div class="code-block" style="font-size: 1.3vw;">
+                                <p>互联网文本(10TB)</p>
+                                <p>↓ 神经网络压缩</p>
+                                <p>模型参数(140GB)</p>
+                                <p style="color: var(--primary-light); margin-top: 1vh;">压缩比 ~100:1</p>
+                            </div>
+                            <p style="font-size: 1.3vw; margin-top: 2vh;">这个过程中，模型学会了：</p>
+                            <ul style="font-size: 1.2vw;">
+                                <li><strong>知识提取：</strong>记住重要的事实和概念</li>
+                                <li><strong>模式识别：</strong>理解语言的深层规律</li>
+                                <li><strong>推理能力：</strong>学会简单的逻辑推导</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: 监督微调 -->
+        <div id="slide6" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">阶段二：监督微调（SFT）</h2>
+                <p class="ppt-subtitle animated">从生成器到助手</p>
+                
+                <div class="highlight-box animated">
+                    <p style="font-size: 1.5vw;">
+                        预训练后的模型像是一个"博学但不会对话的学者"<br>
+                        SFT让它学会如何有效交流
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8" style="margin-top: 4vh;">
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--secondary-light); font-size: 1.8vw; margin-bottom: 2vh;">微调数据的特点</h3>
+                        <ul style="font-size: 1.3vw;">
+                            <li><strong>数量少但质量高：</strong><br>约10万个高质量对话（vs 10TB预训练数据）</li>
+                            <li><strong>人工标注：</strong><br>雇佣专业标注员创建理想的问答对</li>
+                            <li><strong>涵盖多种任务：</strong><br>问答、写作、编程、分析等</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 style="color: var(--primary-light); font-size: 1.8vw; margin-bottom: 2vh;">微调前后的对比</h3>
+                        <div class="code-block animated" style="font-size: 1.2vw;">
+                            <p style="color: var(--text-muted);">// 预训练模型</p>
+                            <p>输入："什么是DNA？"</p>
+                            <p>输出："是脱氧核糖核酸的缩写，由James Watson和Francis Crick在1953年..."</p>
+                            <p style="color: var(--text-hint);">（像在写百科全书）</p>
+                            <br>
+                            <p style="color: var(--text-muted);">// 微调后模型</p>
+                            <p>输入："什么是DNA？"</p>
+                            <p>输出："DNA是脱氧核糖核酸的缩写，它是生物体内携带遗传信息的分子。您想了解DNA的结构、功能还是其他方面？"</p>
+                            <p style="color: var(--accent-light);">（像在对话）</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: RLHF -->
+        <div id="slide7" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">阶段三：强化学习（RLHF）</h2>
+                <p class="ppt-subtitle animated">与人类价值对齐</p>
+                
+                <div class="emphasis animated" style="margin-bottom: 3vh;">
+                    <p style="font-size: 1.5vw; text-align: center;">
+                        即使经过SFT，模型仍可能生成不当内容<br>
+                        RLHF（Reinforcement Learning from Human Feedback）解决这个问题
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--secondary-light); font-size: 1.6vw; margin-bottom: 1vh;">
+                            <iconify-icon icon="mdi:account-group"></iconify-icon> 收集人类反馈
+                        </h3>
+                        <p style="font-size: 1.2vw;">让人类对模型输出打分，标注哪些回答更好</p>
+                    </div>
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--primary-light); font-size: 1.6vw; margin-bottom: 1vh;">
+                            <iconify-icon icon="mdi:trophy"></iconify-icon> 训练奖励模型
+                        </h3>
+                        <p style="font-size: 1.2vw;">学习人类的偏好，理解什么样的回答是好的</p>
+                    </div>
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--accent-light); font-size: 1.6vw; margin-bottom: 1vh;">
+                            <iconify-icon icon="mdi:rocket-launch"></iconify-icon> 强化学习优化
+                        </h3>
+                        <p style="font-size: 1.2vw;">让模型生成更高分的回答，持续改进</p>
+                    </div>
+                </div>
+
+                <div class="highlight-box animated" style="margin-top: 4vh;">
+                    <h3 style="color: var(--primary-light); font-size: 1.8vw; text-align: center;">RLHF的3H原则</h3>
+                    <div class="grid grid-cols-3 gap-4" style="margin-top: 2vh;">
+                        <div style="text-align: center;">
+                            <p style="font-size: 2.5vw; font-weight: 700; color: var(--secondary-light);">Helpful</p>
+                            <p style="font-size: 1.2vw;">更有帮助</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <p style="font-size: 2.5vw; font-weight: 700; color: var(--primary-light);">Honest</p>
+                            <p style="font-size: 1.2vw;">更诚实</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <p style="font-size: 2.5vw; font-weight: 700; color: var(--accent-light);">Harmless</p>
+                            <p style="font-size: 1.2vw;">更无害</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Scaling Law详解 -->
+        <div id="slide8" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">Scaling Law：大力出奇迹的科学依据</h2>
+                <p class="ppt-subtitle animated">2020年，OpenAI发现了LLM的"物理定律"</p>
+                
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <div class="code-block animated" style="font-size: 1.6vw;">
+                            <p style="color: var(--accent-light);">Loss = f(N, D)</p>
+                            <p style="margin-top: 1vh;">N = 模型参数量</p>
+                            <p>D = 训练数据量</p>
+                        </div>
+                        
+                        <div class="highlight-box animated" style="margin-top: 3vh;">
+                            <h3 style="color: var(--primary-light); font-size: 1.8vw;">关键洞察</h3>
+                            <ol style="font-size: 1.3vw; margin-top: 1vh; padding-left: 2vw;">
+                                <li><strong>平滑提升：</strong>性能随规模平滑增长，没有突然的跃变</li>
+                                <li><strong>无饱和迹象：</strong>目前还没看到性能上限</li>
+                                <li><strong>最优比例：</strong>参数量和数据量需要平衡增长</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 style="color: var(--secondary-light); font-size: 1.8vw; margin-bottom: 2vh;">Scaling Law的实际影响</h3>
+                        <table class="data-table animated">
+                            <thead>
+                                <tr>
+                                    <th>模型规模</th>
+                                    <th>能力表现</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1B参数</td>
+                                    <td>基础语言理解，简单问答</td>
+                                </tr>
+                                <tr>
+                                    <td>10B参数</td>
+                                    <td>复杂推理，多轮对话</td>
+                                </tr>
+                                <tr>
+                                    <td>100B参数</td>
+                                    <td>专业知识，创造性任务</td>
+                                </tr>
+                                <tr>
+                                    <td>1T+参数</td>
+                                    <td>接近人类专家水平</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="emphasis animated" style="margin-top: 3vh;">
+                            <h4 style="color: var(--accent-light); font-size: 1.6vw;">对生信研究的启示</h4>
+                            <ul style="font-size: 1.2vw;">
+                                <li>更大的模型 = 更强的生物学知识理解</li>
+                                <li>专门的生物医学大模型正在开发中</li>
+                                <li>未来可能出现"AI生物学家"</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: LDM - 新插入的页面 -->
+        <div id="slide9" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">通用数据大模型（LDM）：数据领域的GPT</h2>
+                <p class="ppt-subtitle animated">当Scaling Law遇上数据分析</p>
+                
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <div class="emphasis animated">
+                            <h3 style="color: var(--secondary-light); font-size: 1.8vw; margin-bottom: 2vh;">什么是LDM？</h3>
+                            <p style="font-size: 1.3vw;">
+                                类似LLM，但专注于<strong>数值数据</strong>而非文本<br>
+                                基于Transformer架构，在海量真实数据集及结构因果合成数据集上训练<br>
+                                具备强大的数据理解、预测及泛化能力
+                            </p>
+                            <div class="code-block" style="margin-top: 2vh; font-size: 1.2vw;">
+                                <p>LLM: Next Token Prediction</p>
+                                <p>LDM: Missing Value Prediction</p>
+                            </div>
+                        </div>
+                        
+                        <div class="emphasis animated" style="margin-top: 3vh;">
+                            <h3 style="color: var(--primary-light); font-size: 1.8vw; margin-bottom: 2vh;">核心突破</h3>
+                            <ul style="font-size: 1.2vw;">
+                                <li><strong>解决LLM数值短板：</strong>如9.11 vs 9.9比较</li>
+                                <li><strong>学习因果结构：</strong>而非简单关联</li>
+                                <li><strong>通用性验证：</strong>跨领域数据均有效</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="emphasis animated">
+                            <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 2vh;">LDM技术架构</h3>
+                            <table class="data-table" style="font-size: 1.1vw;">
+                                <thead>
+                                    <tr>
+                                        <th>版本</th>
+                                        <th>参数规模</th>
+                                        <th>效果提升</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>LDM-V1</td>
+                                        <td>2600万</td>
+                                        <td>持平SOTA</td>
+                                    </tr>
+                                    <tr>
+                                        <td>LDM-V2</td>
+                                        <td>6000万</td>
+                                        <td>超过SOTA</td>
+                                    </tr>
+                                    <tr>
+                                        <td>规划中</td>
+                                        <td>10亿→100亿</td>
+                                        <td>显著超出</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="highlight-box animated" style="margin-top: 3vh;">
+                            <h3 style="color: var(--primary-light); font-size: 1.8vw;">实际应用成果</h3>
+                            <div class="grid grid-cols-2 gap-4" style="margin-top: 2vh;">
+                                <div>
+                                    <p style="font-size: 1.3vw; color: var(--secondary-light);"><strong>工业制造</strong></p>
+                                    <p style="font-size: 1.1vw;">故障预测准确率 ↑15-23%</p>
+                                </div>
+                                <div>
+                                    <p style="font-size: 1.3vw; color: var(--accent-light);"><strong>生物医药</strong></p>
+                                    <p style="font-size: 1.1vw;">疾病诊断、预后分型</p>
+                                </div>
+                            </div>
+                            <p style="font-size: 1.2vw; text-align: center; margin-top: 2vh; color: var(--text-secondary);">
+                                LDM + Scaling Law = 数据分析新范式
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: LLM的核心能力 -->
+        <div id="slide10" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">LLM的三大核心能力</h2>
+                
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="emphasis animated">
+                        <div style="text-align: center; margin-bottom: 2vh;">
+                            <iconify-icon icon="mdi:eye" style="font-size: 4vw; color: var(--secondary-light);"></iconify-icon>
+                        </div>
+                        <h3 style="color: var(--secondary-light); font-size: 1.8vw; text-align: center;">理解能力</h3>
+                        <ul style="font-size: 1.2vw; margin-top: 1vh;">
+                            <li>理解复杂的科学概念和专业术语</li>
+                            <li>把握上下文关系</li>
+                            <li>识别隐含的研究问题</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated">
+                        <div style="text-align: center; margin-bottom: 2vh;">
+                            <iconify-icon icon="mdi:head-lightbulb" style="font-size: 4vw; color: var(--primary-light);"></iconify-icon>
+                        </div>
+                        <h3 style="color: var(--primary-light); font-size: 1.8vw; text-align: center;">推理能力</h3>
+                        <ul style="font-size: 1.2vw; margin-top: 1vh;">
+                            <li>整合多源信息进行综合分析</li>
+                            <li>生成研究假设</li>
+                            <li>发现潜在的关联模式</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated">
+                        <div style="text-align: center; margin-bottom: 2vh;">
+                            <iconify-icon icon="mdi:creation" style="font-size: 4vw; color: var(--accent-light);"></iconify-icon>
+                        </div>
+                        <h3 style="color: var(--accent-light); font-size: 1.8vw; text-align: center;">生成能力</h3>
+                        <ul style="font-size: 1.2vw; margin-top: 1vh;">
+                            <li>生成结构化的分析报告</li>
+                            <li>创建可视化代码</li>
+                            <li>提供个性化的解释</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="highlight-box animated" style="margin-top: 4vh;">
+                    <h3 style="color: var(--primary-light); font-size: 1.8vw;">知识的压缩与重组</h3>
+                    <div class="grid grid-cols-2 gap-6" style="margin-top: 2vh;">
+                        <div>
+                            <p style="font-size: 1.4vw;"><strong>搜索引擎：</strong><br>找到并返回原始文档</p>
+                        </div>
+                        <div>
+                            <p style="font-size: 1.4vw;"><strong>LLM：</strong><br>理解、整合、重新组织知识</p>
+                        </div>
+                    </div>
+                    <p style="font-size: 1.3vw; text-align: center; margin-top: 2vh; color: var(--accent-light);">
+                        这种能力对于生物数据分析特别有价值——<br>它可以理解不同层次生物数据之间的内在联系
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: LLM的局限性 -->
+        <div id="slide11" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">当前的局限性</h2>
+                
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <div class="emphasis animated">
+                            <h3 style="color: var(--secondary-light); font-size: 1.8vw; margin-bottom: 2vh;">
+                                <iconify-icon icon="mdi:alert"></iconify-icon> 幻觉现象
+                            </h3>
+                            <p style="font-size: 1.3vw;">可能生成看似合理但实际错误的信息</p>
+                            <ul style="font-size: 1.2vw; margin-top: 1vh;">
+                                <li>虚构的基因名称或不存在的研究结果</li>
+                                <li>原因：模型是在"插值"而非"记忆"</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="emphasis animated" style="margin-top: 3vh;">
+                            <h3 style="color: var(--primary-light); font-size: 1.8vw; margin-bottom: 2vh;">
+                                <iconify-icon icon="mdi:calendar-clock"></iconify-icon> 知识时效性
+                            </h3>
+                            <p style="font-size: 1.3vw;">训练数据有截止日期</p>
+                            <ul style="font-size: 1.2vw; margin-top: 1vh;">
+                                <li>GPT-4的知识截止于2023年</li>
+                                <li>无法获知最新的研究进展</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="emphasis animated">
+                            <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 2vh;">
+                                <iconify-icon icon="mdi:calculator"></iconify-icon> 计算精度
+                            </h3>
+                            <p style="font-size: 1.3vw;">不擅长精确的数值计算</p>
+                            <ul style="font-size: 1.2vw; margin-top: 1vh;">
+                                <li>需要调用外部工具进行统计分析</li>
+                                <li>这也是为什么需要AI+BI结合</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="emphasis animated" style="margin-top: 3vh;">
+                            <h3 style="color: var(--secondary-dark); font-size: 1.8vw; margin-bottom: 2vh;">
+                                <iconify-icon icon="mdi:brain"></iconify-icon> 深度推理
+                            </h3>
+                            <p style="font-size: 1.3vw;">缺乏"System 2"思维</p>
+                            <ul style="font-size: 1.2vw; margin-top: 1vh;">
+                                <li>System 1：快速、直觉（当前LLM）</li>
+                                <li>System 2：慢速、深思（未来方向）</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: 从LLM到Agent -->
+        <div id="slide12" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">从LLM到智能Agent</h2>
+                <p class="ppt-subtitle animated">让AI从"回答问题"到"解决问题"</p>
+                
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <div class="emphasis animated">
+                            <h3 style="color: var(--secondary-light); font-size: 2vw; margin-bottom: 2vh;">传统LLM的局限</h3>
+                            <ul style="font-size: 1.3vw;">
+                                <li>知识截止于训练时间</li>
+                                <li>无法访问实时数据</li>
+                                <li>缺乏工具使用能力</li>
+                                <li>单次回答，无法迭代</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="emphasis animated">
+                            <h3 style="color: var(--accent-light); font-size: 2vw; margin-bottom: 2vh;">Agent的突破</h3>
+                            <ul style="font-size: 1.3vw;">
+                                <li>实时检索外部知识</li>
+                                <li>主动调用各种工具</li>
+                                <li>多步推理和规划</li>
+                                <li>自主探索和验证</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="code-block animated" style="margin-top: 4vh; font-size: 1.4vw;">
+                    <p style="color: var(--text-muted); margin-bottom: 1vh;">// Agent工作流程示例</p>
+                    <p>用户: "分析这个基因在不同癌症中的表达"</p>
+                    <p style="color: var(--accent-light); margin-top: 1vh;">Agent工作流程:</p>
+                    <p>[理解意图] → [查询数据库] → [统计分析] → [文献检索] → [生成报告]</p>
+                </div>
+
+                <div class="highlight-box animated" style="margin-top: 3vh;">
+                    <p style="font-size: 1.6vw; text-align: center; color: var(--primary-light);">
+                        Agent = LLM + 工具使用 + 规划能力 + 记忆系统
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: RAG技术详解 -->
+        <div id="slide13" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">RAG：让AI接入外部知识</h2>
+                <p class="ppt-subtitle animated">Retrieval-Augmented Generation</p>
+                
+                <div class="emphasis animated" style="margin-bottom: 3vh;">
+                    <p style="font-size: 1.5vw; text-align: center;">
+                        RAG就像给LLM配备了一个"图书馆管理员"<br>
+                        <span style="color: var(--text-muted);">传统LLM：只能依靠训练时的知识</span><br>
+                        <span style="color: var(--accent-light);">RAG系统：可以实时查询外部数据库</span>
+                    </p>
+                </div>
+
+                <div class="code-block animated" style="font-size: 1.6vw; text-align: center;">
+                    <p>用户问题 → 检索相关文档 → 将文档作为上下文 → LLM生成答案</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-6" style="margin-top: 4vh;">
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--secondary-light); font-size: 1.6vw; margin-bottom: 1vh;">
+                            <iconify-icon icon="mdi:database-search"></iconify-icon> 在生信中的应用
+                        </h3>
+                        <ul style="font-size: 1.2vw;">
+                            <li>接入PubMed最新文献</li>
+                            <li>查询KEGG通路数据库</li>
+                            <li>检索实验室内部数据</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--primary-light); font-size: 1.6vw; margin-bottom: 1vh;">
+                            <iconify-icon icon="mdi:lightning-bolt"></iconify-icon> RAG的优势
+                        </h3>
+                        <ul style="font-size: 1.2vw;">
+                            <li>知识实时更新</li>
+                            <li>减少幻觉现象</li>
+                            <li>可验证的信息源</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--accent-light); font-size: 1.6vw; margin-bottom: 1vh;">
+                            <iconify-icon icon="mdi:cog"></iconify-icon> 技术要点
+                        </h3>
+                        <ul style="font-size: 1.2vw;">
+                            <li>向量数据库存储</li>
+                            <li>语义相似度检索</li>
+                            <li>上下文窗口管理</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Deep Research详解 -->
+        <div id="slide14" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">Deep Research：从查询到研究</h2>
+                
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="ppt-subtitle animated">传统搜索 vs Deep Research</h3>
+                        <table class="data-table animated">
+                            <thead>
+                                <tr>
+                                    <th>传统搜索</th>
+                                    <th>Deep Research</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>一次查询</td>
+                                    <td>迭代式探索</td>
+                                </tr>
+                                <tr>
+                                    <td>返回链接列表</td>
+                                    <td>生成综合报告</td>
+                                </tr>
+                                <tr>
+                                    <td>需要人工整合</td>
+                                    <td>自动整合分析</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <h3 class="ppt-subtitle animated">Deep Research的核心流程</h3>
+                        <div class="emphasis animated">
+                            <ol style="font-size: 1.3vw;">
+                                <li><strong>理解问题：</strong>不只是关键词，而是理解研究意图</li>
+                                <li><strong>制定计划：</strong>分解为多个子问题</li>
+                                <li><strong>迭代查询：</strong>根据发现调整搜索策略</li>
+                                <li><strong>综合分析：</strong>整合多源信息，生成洞察</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="highlight-box animated" style="margin-top: 4vh;">
+                    <h3 style="color: var(--primary-light); font-size: 1.8vw;">我们的Very Deep Research (VDR)框架</h3>
+                    <div class="code-block" style="margin-top: 2vh; font-size: 1.3vw;">
+                        <pre>┌─────────────────────────────┐
+│   Deep Research Core        │
+│  (深度思考与规划引擎)        │
+└─────────────┬───────────────┘
+              │
+    ┌─────────┼─────────┬─────────────┐
+    ▼         ▼         ▼             ▼
+┌─────────┐┌─────────┐┌─────────┐┌─────────┐
+│  Web    ││专用数据库││本地文件 ││  ...    │
+│ Search  ││         ││         ││         │
+└─────────┘└─────────┘└─────────┘└─────────┘</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: AI+BI概述 -->
+        <div id="slide15" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">AI+BI：数据分析的智能化革命</h2>
+                <p class="ppt-subtitle animated">Business Intelligence的演进</p>
+                
+                <div class="emphasis animated" style="margin-bottom: 3vh;">
+                    <h3 style="color: var(--secondary-light); font-size: 1.8vw; margin-bottom: 1vh;">传统BI工具的局限</h3>
+                    <ul style="font-size: 1.3vw;">
+                        <li>需要SQL专家</li>
+                        <li>固定的报表模板</li>
+                        <li>难以发现隐藏洞察</li>
+                    </ul>
+                </div>
+
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="emphasis animated">
+                        <div style="text-align: center; margin-bottom: 2vh;">
+                            <iconify-icon icon="mdi:message-text" style="font-size: 3vw; color: var(--primary-light);"></iconify-icon>
+                        </div>
+                        <h3 style="color: var(--primary-light); font-size: 1.6vw; text-align: center;">自然语言交互</h3>
+                        <p style="font-size: 1.2vw; margin-top: 1vh;">
+                            "这个月哪个产品的销售异常？"<br>
+                            AI自动转换为SQL查询
+                        </p>
+                    </div>
+                    <div class="emphasis animated">
+                        <div style="text-align: center; margin-bottom: 2vh;">
+                            <iconify-icon icon="mdi:lightbulb-on" style="font-size: 3vw; color: var(--accent-light);"></iconify-icon>
+                        </div>
+                        <h3 style="color: var(--accent-light); font-size: 1.6vw; text-align: center;">智能洞察发现</h3>
+                        <p style="font-size: 1.2vw; margin-top: 1vh;">
+                            不只是查询，还能发现模式<br>
+                            自动生成假设并验证
+                        </p>
+                    </div>
+                    <div class="emphasis animated">
+                        <div style="text-align: center; margin-bottom: 2vh;">
+                            <iconify-icon icon="mdi:robot" style="font-size: 3vw; color: var(--secondary-light);"></iconify-icon>
+                        </div>
+                        <h3 style="color: var(--secondary-light); font-size: 1.6vw; text-align: center;">Agent范式引入</h3>
+                        <p style="font-size: 1.2vw; margin-top: 1vh;">
+                            从"工具"到"分析师"<br>
+                            自主探索数据，生成洞察
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: 中国移动案例详情 -->
+        <div id="slide16" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">实战案例：中国移动换机预警</h2>
+                
+                <div class="highlight-box animated" style="margin-bottom: 3vh;">
+                    <h3 style="color: var(--primary-light); font-size: 1.8vw;">背景：预测客户流失的挑战</h3>
+                    <ul style="font-size: 1.3vw; margin-top: 1vh;">
+                        <li>海量用户数据（亿级）</li>
+                        <li>复杂的行为模式</li>
+                        <li>需要提前预警干预</li>
+                    </ul>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="ppt-subtitle animated">传统方法 vs AI Agent方法</h3>
+                        <table class="data-table animated">
+                            <thead>
+                                <tr>
+                                    <th>维度</th>
+                                    <th>传统方法</th>
+                                    <th>AI Agent</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>特征提取</td>
+                                    <td>手工10个</td>
+                                    <td>自动50+个</td>
+                                </tr>
+                                <tr>
+                                    <td>验证方式</td>
+                                    <td>人工逐一</td>
+                                    <td>自动批量</td>
+                                </tr>
+                                <tr>
+                                    <td>迭代周期</td>
+                                    <td>数周</td>
+                                    <td>数小时</td>
+                                </tr>
+                                <tr>
+                                    <td>覆盖度</td>
+                                    <td>经验特征</td>
+                                    <td>系统探索</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <div class="emphasis animated">
+                            <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 1vh;">实际成果</h3>
+                            <div style="display: flex; justify-content: space-around; margin-top: 2vh;">
+                                <div style="text-align: center;">
+                                    <p class="big-number" style="font-size: 4vw;">20%+</p>
+                                    <p style="font-size: 1.2vw;">预测准确率提升</p>
+                                </div>
+                                <div style="text-align: center;">
+                                    <p class="big-number" style="font-size: 4vw;">100x</p>
+                                    <p style="font-size: 1.2vw;">分析效率提升</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 17: Agent工作流程 -->
+        <div id="slide17" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">AI Agent的工作流程</h2>
+                
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--secondary-light); font-size: 1.8vw; margin-bottom: 2vh;">1. 自动理解数据仓库</h3>
+                        <div class="code-block" style="font-size: 1.1vw;">
+                            <p>Agent: "我发现了用户表、通话记录表、套餐变更表..."</p>
+                            <p>Agent: "这些表通过user_id关联，让我探索可能的特征"</p>
+                        </div>
+                    </div>
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--primary-light); font-size: 1.8vw; margin-bottom: 2vh;">2. 特征自动泛化</h3>
+                        <div class="code-block" style="font-size: 1.1vw;">
+                            <p>人工特征："最近30天通话时长下降"</p>
+                            <p style="color: var(--accent-light);">Agent泛化：</p>
+                            <p>- "最近7/14/60天通话时长变化"</p>
+                            <p>- "通话时长下降速度"</p>
+                            <p>- "与历史同期对比的异常程度"</p>
+                            <p>- "分时段通话模式变化"</p>
+                        </div>
+                    </div>
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 2vh;">3. 智能验证与优化</h3>
+                        <div class="code-block" style="font-size: 1.1vw;">
+                            <p>Agent: "我测试了73个候选特征"</p>
+                            <p>Agent: "其中51个有显著预测能力"</p>
+                            <p>Agent: "组合使用时预测准确率达到..."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight-box animated" style="margin-top: 4vh;">
+                    <h3 style="color: var(--primary-light); font-size: 1.8vw;">Agent的思考过程</h3>
+                    <div class="code-block" style="margin-top: 2vh; font-size: 1.3vw;">
+                        <p>"用户在流失前可能有什么行为？"</p>
+                        <p>→ "通话减少" → 验证 ✓</p>
+                        <p>→ "换套餐" → 验证 ✓</p>
+                        <p>→ "投诉增加" → 验证 ✓</p>
+                        <p>→ "充值金额减少" → 验证 ✓</p>
+                        <p>→ "使用竞品App增加" → 需要外部数据</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 18: 数据Agent核心能力 -->
+        <div id="slide18" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">数据Agent的核心能力</h2>
+                
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="emphasis animated">
+                        <div style="text-align: center; margin-bottom: 2vh;">
+                            <iconify-icon icon="mdi:database-eye" style="font-size: 4vw; color: var(--secondary-light);"></iconify-icon>
+                        </div>
+                        <h3 style="color: var(--secondary-light); font-size: 1.8vw; text-align: center;">数据理解能力</h3>
+                        <ul style="font-size: 1.2vw; margin-top: 1vh;">
+                            <li>自动识别表结构和关系</li>
+                            <li>理解字段的业务含义</li>
+                            <li>发现数据质量问题</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated">
+                        <div style="text-align: center; margin-bottom: 2vh;">
+                            <iconify-icon icon="mdi:test-tube" style="font-size: 4vw; color: var(--primary-light);"></iconify-icon>
+                        </div>
+                        <h3 style="color: var(--primary-light); font-size: 1.8vw; text-align: center;">假设生成与验证</h3>
+                        <ul style="font-size: 1.2vw; margin-top: 1vh;">
+                            <li>基于领域知识生成假设</li>
+                            <li>设计验证方案</li>
+                            <li>自动执行验证</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated">
+                        <div style="text-align: center; margin-bottom: 2vh;">
+                            <iconify-icon icon="mdi:file-document-edit" style="font-size: 4vw; color: var(--accent-light);"></iconify-icon>
+                        </div>
+                        <h3 style="color: var(--accent-light); font-size: 1.8vw; text-align: center;">解释性分析</h3>
+                        <ul style="font-size: 1.2vw; margin-top: 1vh;">
+                            <li>不是黑盒模型</li>
+                            <li>每个特征都有业务解释</li>
+                            <li>可以生成分析报告</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="highlight-box animated" style="margin-top: 4vh;">
+                    <p style="font-size: 1.6vw; text-align: center; color: var(--primary-light);">
+                        Agent不仅告诉你"是什么"，更重要的是告诉你"为什么"
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 19: 从电信到生信 -->
+        <div id="slide19" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">从电信到生信：能力迁移</h2>
+                <p class="ppt-subtitle animated">相似的挑战，相通的解决方案</p>
+                
+                <table class="data-table animated" style="font-size: 1.3vw;">
+                    <thead>
+                        <tr>
+                            <th>电信场景</th>
+                            <th>生信场景</th>
+                            <th>Agent能力</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>客户行为数据</td>
+                            <td>基因表达数据</td>
+                            <td>模式识别</td>
+                        </tr>
+                        <tr>
+                            <td>多维度数据(通话、流量、位置)</td>
+                            <td>多组学数据(基因、蛋白、代谢)</td>
+                            <td>数据整合</td>
+                        </tr>
+                        <tr>
+                            <td>预测客户流失</td>
+                            <td>预测疾病进展</td>
+                            <td>风险建模</td>
+                        </tr>
+                        <tr>
+                            <td>从10到50+特征</td>
+                            <td>从已知到新biomarker</td>
+                            <td>特征发现</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="grid grid-cols-3 gap-6" style="margin-top: 4vh;">
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--secondary-light); font-size: 1.6vw; margin-bottom: 1vh;">生信数据的特殊性</h3>
+                        <p style="font-size: 1.2vw;"><strong>更高的维度</strong></p>
+                        <ul style="font-size: 1.1vw;">
+                            <li>电信：百个特征</li>
+                            <li>生信：万个基因</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--primary-light); font-size: 1.6vw; margin-bottom: 1vh;">专业性要求</h3>
+                        <p style="font-size: 1.2vw;"><strong>更强的专业性</strong></p>
+                        <ul style="font-size: 1.1vw;">
+                            <li>需要生物学知识</li>
+                            <li>因果关系复杂</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated">
+                        <h3 style="color: var(--accent-light); font-size: 1.6vw; margin-bottom: 1vh;">验证标准</h3>
+                        <p style="font-size: 1.2vw;"><strong>更严格的验证</strong></p>
+                        <ul style="font-size: 1.1vw;">
+                            <li>需要实验验证</li>
+                            <li>涉及生命健康</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 20: 单细胞分析Agent -->
+        <div id="slide20" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">单细胞数据分析Agent</h2>
+                
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <div class="emphasis animated">
+                            <h3 style="color: var(--secondary-light); font-size: 1.8vw; margin-bottom: 2vh;">单细胞分析的挑战</h3>
+                            <p style="font-size: 1.3vw;">一个典型的scRNA-seq数据集：</p>
+                            <ul style="font-size: 1.2vw; margin-top: 1vh;">
+                                <li>100万+个细胞</li>
+                                <li>每个细胞2-3万个基因</li>
+                                <li>稀疏矩阵（90%+是0）</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="emphasis animated" style="margin-top: 3vh;">
+                            <h3 style="color: var(--primary-light); font-size: 1.8vw; margin-bottom: 2vh;">传统分析流程的痛点</h3>
+                            <div class="code-block" style="font-size: 1.1vw;">
+                                <p>质控 → 降维 → 聚类 → 注释 → 差异分析 → 功能富集</p>
+                                <p style="color: var(--text-muted); margin-top: 1vh;">
+                                  ↓      ↓      ↓      ↓        ↓         ↓<br>
+                                需要经验 调参困难 算法选择 查询数据库 统计检验  生物解释
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="emphasis animated">
+                            <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 2vh;">Agent的独特价值</h3>
+                            <div class="icon-feature">
+                                <iconify-icon icon="mdi:auto-fix" style="font-size: 2vw;"></iconify-icon>
+                                <div>
+                                    <p style="font-size: 1.3vw;"><strong>自适应分析</strong></p>
+                                    <p style="font-size: 1.1vw;">根据数据特点选择方法，动态调整参数</p>
+                                </div>
+                            </div>
+                            <div class="icon-feature" style="margin-top: 2vh;">
+                                <iconify-icon icon="mdi:book-open-variant" style="font-size: 2vw;"></iconify-icon>
+                                <div>
+                                    <p style="font-size: 1.3vw;"><strong>知识驱动</strong></p>
+                                    <p style="font-size: 1.1vw;">整合最新细胞类型数据库，关联文献发现</p>
+                                </div>
+                            </div>
+                            <div class="icon-feature" style="margin-top: 2vh;">
+                                <iconify-icon icon="mdi:lightbulb-on-outline" style="font-size: 2vw;"></iconify-icon>
+                                <div>
+                                    <p style="font-size: 1.3vw;"><strong>假设生成</strong></p>
+                                    <div class="code-block" style="font-size: 1vw; margin-top: 1vh;">
+                                        <p>Agent: "发现一个新的细胞亚群"</p>
+                                        <p>Agent: "它高表达基因A、B、C"</p>
+                                        <p>Agent: "根据文献，这可能是..."</p>
+                                        <p>Agent: "建议用流式验证，marker组合..."</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 21: 多组学整合Agent -->
+        <div id="slide21" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">多组学整合Agent</h2>
+                
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <div class="emphasis animated">
+                            <h3 style="color: var(--secondary-light); font-size: 1.8vw; margin-bottom: 2vh;">多组学数据的复杂性</h3>
+                            <div class="code-block" style="font-size: 1.1vw;">
+                                <pre>组学层次：
+├── 基因组 (DNA变异)
+├── 表观组 (甲基化、染色质)
+├── 转录组 (RNA表达)
+├── 蛋白组 (蛋白丰度)
+└── 代谢组 (代谢物)
+
+每层都有不同的：
+- 数据格式
+- 数值范围
+- 生物学意义</pre>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="emphasis animated">
+                            <h3 style="color: var(--primary-light); font-size: 1.8vw; margin-bottom: 2vh;">多组学Agent的架构</h3>
+                            <div class="code-block" style="font-size: 1vw;">
+                                <pre>Multi-Omics Integration Agent
+├── 数据协调模块
+│   ├── 格式统一
+│   ├── 样本匹配
+│   └── 批次校正
+├── 跨层分析模块
+│   ├── 垂直整合(基因→RNA→蛋白)
+│   └── 水平关联(通路富集)
+├── 模式发现模块
+│   ├── 多组学聚类
+│   └── 调控网络推断
+└── 假设生成模块
+    ├── 因果推断
+    └── 验证建议</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight-box animated" style="margin-top: 3vh;">
+                    <h3 style="color: var(--accent-light); font-size: 1.8vw;">工作示例</h3>
+                    <div class="code-block" style="margin-top: 2vh; font-size: 1.2vw;">
+                        <p>用户："为什么这个基因RNA高表达但蛋白很少？"</p>
+                        <p style="color: var(--primary-light); margin-top: 1vh;">Agent分析过程：</p>
+                        <p>1. 检查RNA数据 ✓ 确认高表达</p>
+                        <p>2. 检查蛋白数据 ✓ 确认低丰度</p>
+                        <p>3. 查看甲基化 → "启动子无甲基化，排除表观遗传沉默"</p>
+                        <p>4. 分析RNA二级结构 → "发现IRES结构，可能影响翻译"</p>
+                        <p>5. 检查miRNA → "miR-XXX可能抑制翻译"</p>
+                        <p>6. 查询文献 → "类似现象在XX疾病中报道过"</p>
+                        <p style="color: var(--accent-light); margin-top: 1vh;">结论："可能是转录后调控，建议检查..."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 22: 科研文献智能化 -->
+        <div id="slide22" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">科研文献智能化</h2>
+                <p class="ppt-subtitle animated">AI正在改变科研文献的使用方式</p>
+                
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="emphasis animated">
+                        <div style="text-align: center; margin-bottom: 2vh;">
+                            <iconify-icon icon="mdi:magnify-scan" style="font-size: 4vw; color: var(--secondary-light);"></iconify-icon>
+                        </div>
+                        <h3 style="color: var(--secondary-light); font-size: 1.8vw; text-align: center;">智能检索</h3>
+                        <ul style="font-size: 1.2vw; margin-top: 1vh;">
+                            <li>语义搜索而非关键词匹配</li>
+                            <li>跨学科知识发现</li>
+                            <li>相关性排序优化</li>
+                            <li>引文网络分析</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated">
+                        <div style="text-align: center; margin-bottom: 2vh;">
+                            <iconify-icon icon="mdi:file-document-outline" style="font-size: 4vw; color: var(--primary-light);"></iconify-icon>
+                        </div>
+                        <h3 style="color: var(--primary-light); font-size: 1.8vw; text-align: center;">自动总结</h3>
+                        <ul style="font-size: 1.2vw; margin-top: 1vh;">
+                            <li>快速把握研究进展</li>
+                            <li>生成领域综述</li>
+                            <li>提取关键发现</li>
+                            <li>对比不同研究</li>
+                        </ul>
+                    </div>
+                    <div class="emphasis animated">
+                        <div style="text-align: center; margin-bottom: 2vh;">
+                            <iconify-icon icon="mdi:lightbulb-on" style="font-size: 4vw; color: var(--accent-light);"></iconify-icon>
+                        </div>
+                        <h3 style="color: var(--accent-light); font-size: 1.8vw; text-align: center;">假设生成</h3>
+                        <ul style="font-size: 1.2vw; margin-top: 1vh;">
+                            <li>基于文献提出新研究方向</li>
+                            <li>发现研究空白</li>
+                            <li>预测研究趋势</li>
+                            <li>跨领域知识融合</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="highlight-box animated" style="margin-top: 4vh;">
+                    <h3 style="color: var(--primary-light); font-size: 1.8vw;">实际应用场景</h3>
+                    <div class="grid grid-cols-2 gap-6" style="margin-top: 2vh;">
+                        <div>
+                            <p style="font-size: 1.3vw;"><strong>文献追踪：</strong></p>
+                            <p style="font-size: 1.2vw;">AI持续监控领域最新进展，自动推送相关文献</p>
+                        </div>
+                        <div>
+                            <p style="font-size: 1.3vw;"><strong>知识图谱：</strong></p>
+                            <p style="font-size: 1.2vw;">构建研究领域知识网络，发现隐藏的关联</p>
+                        </div>
+                    </div>
+                    <p style="font-size: 1.4vw; text-align: center; margin-top: 2vh; color: var(--accent-light);">
+                        这些能力都可以集成到我们的Agent框架中，为研究提供全方位支持
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 23: 技术发展趋势 -->
+        <div id="slide23" class="slide">
+            <div class="slide-content">
+                <h2 class="ppt-title animated">技术发展趋势</h2>
+                <p class="ppt-subtitle animated">基于Scaling Law和技术进展，我们可以预见</p>
+                
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <div class="emphasis animated">
+                            <h3 style="color: var(--secondary-light); font-size: 1.8vw; margin-bottom: 2vh;">
+                                <iconify-icon icon="mdi:server"></iconify-icon> 模型规模继续增长
+                            </h3>
+                            <ul style="font-size: 1.3vw;">
+                                <li>GPT-5可能达到10万亿参数</li>
+                                <li>需要更大的计算集群</li>
+                                <li>训练成本指数级增长</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="emphasis animated" style="margin-top: 3vh;">
+                            <h3 style="color: var(--primary-light); font-size: 1.8vw; margin-bottom: 2vh;">
+                                <iconify-icon icon="mdi:eye-plus"></iconify-icon> 多模态能力
+                            </h3>
+                            <ul style="font-size: 1.3vw;">
+                                <li>不仅理解文本，还理解图像、音频</li>
+                                <li>对生信意义：直接理解显微图像、质谱图</li>
+                                <li>跨模态的知识融合</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="emphasis animated">
+                            <h3 style="color: var(--accent-light); font-size: 1.8vw; margin-bottom: 2vh;">
+                                <iconify-icon icon="mdi:toolbox"></iconify-icon> 工具使用能力
+                            </h3>
+                            <ul style="font-size: 1.3vw;">
+                                <li>主动调用外部工具</li>
+                                <li>成为"AI操作系统"</li>
+                                <li>与专业软件深度集成</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="emphasis animated" style="margin-top: 3vh;">
+                            <h3 style="color: var(--secondary-dark); font-size: 1.8vw; margin-bottom: 2vh;">
+                                <iconify-icon icon="mdi:infinity"></iconify-icon> 自我改进
+                            </h3>
+                            <ul style="font-size: 1.3vw;">
+                                <li>像AlphaGo一样自我对弈</li>
+                                <li>在特定领域超越人类</li>
+                                <li>持续学习新知识</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 24: 总结与展望 -->
+        <div id="slide24" class="slide">
+            <div class="slide-content key-content">
+                <h2 class="ppt-title animated">总结与展望</h2>
+                
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="emphasis animated">
+                        <div class="icon-feature">
+                            <iconify-icon icon="mdi:brain" style="font-size: 3vw;"></iconify-icon>
+                            <h3 style="color: var(--primary-light); font-size: 1.8vw;">更强大的模型</h3>
+                        </div>
+                        <p style="font-size: 1.2vw;">
+                            GPT-5级别模型<br>
+                            专业领域大模型<br>
+                            多模态理解能力
+                        </p>
+                    </div>
+                    <div class="emphasis animated">
+                        <div class="icon-feature">
+                            <iconify-icon icon="mdi:robot" style="font-size: 3vw;"></iconify-icon>
+                            <h3 style="color: var(--secondary-light); font-size: 1.8vw;">更智能的Agent</h3>
+                        </div>
+                        <p style="font-size: 1.2vw;">
+                            自主规划执行<br>
+                            跨系统协作<br>
+                            持续学习进化
+                        </p>
+                    </div>
+                    <div class="emphasis animated">
+                        <div class="icon-feature">
+                            <iconify-icon icon="mdi:dna" style="font-size: 3vw;"></iconify-icon>
+                            <h3 style="color: var(--accent-light); font-size: 1.8vw;">生信新范式</h3>
+                        </div>
+                        <p style="font-size: 1.2vw;">
+                            AI驱动假设生成<br>
+                            自动化实验设计<br>
+                            加速科学发现
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="highlight-box animated" style="margin-top: 6vh;">
+                    <p style="font-size: 2vw; font-weight: 600; text-align: center; color: var(--primary-light);">
+                        AI不是要取代科学家，而是要成为科学家的超级助手
+                    </p>
+                    <p style="font-size: 1.5vw; text-align: center; margin-top: 2vh; color: var(--text-secondary);">
+                        让我们一起探索AI赋能数据分析的无限可能
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 25: 谢谢 -->
+        <div id="slide25" class="slide">
+            <div class="slide-content key-content">
+                <h1 style="font-size: 8vw; text-align: center; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); -webkit-background-clip: text; background-clip: text; color: transparent;">
+                    谢谢！
+                </h1>
+                <p style="font-size: 2.5vw; text-align: center; color: var(--text-secondary); margin-top: 4vh;">
+                    Questions & Discussion
+                </p>
+                
+                <div style="text-align: center; margin-top: 6vh;">
+                    <p style="font-size: 1.5vw; color: var(--text-muted);">
+                        <iconify-icon icon="mdi:email"></iconify-icon> contact@airesearch.lab<br>
+                        <iconify-icon icon="mdi:github"></iconify-icon> github.com/airesearchlab
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide-nav">
+        <div class="slide-dots"></div>
+    </div>
+    <div class="slide-arrow prev">◀</div>
+    <div class="slide-arrow next">▶</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slideContainer = document.querySelector('.slide-container');
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelector('.slide-dots');
+            const prevBtn = document.querySelector('.slide-arrow.prev');
+            const nextBtn = document.querySelector('.slide-arrow.next');
+            let currentSlide = 0;
+            
+            // 创建导航点
+            slides.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.classList.add('slide-dot');
+                if (index === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => scrollToSlide(index));
+                dots.appendChild(dot);
+            });
+
+            // 更新活动导航点
+            function updateActiveDot() {
+                document.querySelectorAll('.slide-dot').forEach((dot, index) => {
+                    if (index === currentSlide) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            }
+
+            // 滚动到指定幻灯片
+            function scrollToSlide(index) {
+                if (index < 0) index = 0;
+                if (index >= slides.length) index = slides.length - 1;
+                
+                currentSlide = index;
+                slides[index].scrollIntoView({ behavior: 'smooth' });
+                updateActiveDot();
+            }
+
+            // 滚动事件监听
+            slideContainer.addEventListener('scroll', function() {
+                requestAnimationFrame(() => {
+                    const scrollPosition = slideContainer.scrollTop;
+                    const windowHeight = window.innerHeight;
+                    
+                    let activeIndex = 0;
+                    slides.forEach((slide, index) => {
+                        const slideTop = slide.offsetTop;
+                        if (scrollPosition >= slideTop - windowHeight / 2) {
+                            activeIndex = index;
+                        }
+                    });
+                    
+                    if (currentSlide !== activeIndex) {
+                        currentSlide = activeIndex;
+                        updateActiveDot();
+                    }
+                });
+            });
+
+            // 按钮控制
+            prevBtn.addEventListener('click', () => scrollToSlide(currentSlide - 1));
+            nextBtn.addEventListener('click', () => scrollToSlide(currentSlide + 1));
+
+            // 键盘控制
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                    e.preventDefault();
+                    scrollToSlide(currentSlide + 1);
+                } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    scrollToSlide(currentSlide - 1);
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    scrollToSlide(0);
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    scrollToSlide(slides.length - 1);
+                }
+            });
+
+            // 触摸支持
+            let touchStartY = 0;
+            
+            document.addEventListener('touchstart', function(e) {
+                touchStartY = e.touches[0].clientY;
+            }, false);
+            
+            document.addEventListener('touchend', function(e) {
+                const touchEndY = e.changedTouches[0].clientY;
+                const yDiff = touchStartY - touchEndY;
+                
+                if (Math.abs(yDiff) > 50) {
+                    if (yDiff > 0) {
+                        scrollToSlide(currentSlide + 1);
+                    } else {
+                        scrollToSlide(currentSlide - 1);
+                    }
+                }
+            }, false);
+        });
+    </script>
+</body>
+</html>
