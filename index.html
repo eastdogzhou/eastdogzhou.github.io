@@ -1,13 +1,1281 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <title>Redirecting…</title>
-  <meta http-equiv="refresh" content="0; url=/claude.html" />
-  <link rel="canonical" href="/claude.html" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzle Read — 让碎片信息自动沉淀为结构化知识</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --text-primary: #f5f5f7;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --accent-primary: #7dd3fc;
+            --accent-secondary: #c4b5fd;
+            --accent-tertiary: #fcd34d;
+            --gradient-mesh: radial-gradient(ellipse at 20% 0%, rgba(125, 211, 252, 0.15) 0%, transparent 50%),
+                             radial-gradient(ellipse at 80% 100%, rgba(196, 181, 253, 0.12) 0%, transparent 50%),
+                             radial-gradient(ellipse at 50% 50%, rgba(252, 211, 77, 0.05) 0%, transparent 70%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Gradient mesh background */
+        .gradient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-mesh);
+            z-index: -1;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(20px);
+            background: rgba(10, 10, 15, 0.7);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo span {
+            font-weight: 400;
+            font-style: italic;
+            opacity: 0.8;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .cta-btn {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: var(--bg-primary);
+            padding: 0.75rem 1.75rem;
+            border-radius: 100px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(125, 211, 252, 0.3);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(125, 211, 252, 0.4);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 8rem 2rem 4rem;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(125, 211, 252, 0.1);
+            border: 1px solid rgba(125, 211, 252, 0.2);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            color: var(--accent-primary);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+            animation: fadeInUp 0.8s ease-out 0.1s both;
+        }
+
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.35rem);
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin-bottom: 3rem;
+            font-weight: 300;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            animation: fadeInUp 0.8s ease-out 0.3s both;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: var(--bg-primary);
+            padding: 1rem 2.5rem;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 30px rgba(125, 211, 252, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 40px rgba(125, 211, 252, 0.5);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            padding: 1rem 2.5rem;
+            border-radius: 100px;
+            font-weight: 500;
+            font-size: 1rem;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Floating elements */
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-card {
+            position: absolute;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 0.75rem;
+            backdrop-filter: blur(10px);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-card:nth-child(1) {
+            top: 20%;
+            left: 8%;
+            animation-delay: 0s;
+        }
+
+        .floating-card:nth-child(2) {
+            top: 30%;
+            right: 10%;
+            animation-delay: 1s;
+        }
+
+        .floating-card:nth-child(3) {
+            bottom: 25%;
+            left: 12%;
+            animation-delay: 2s;
+        }
+
+        .floating-card:nth-child(4) {
+            bottom: 20%;
+            right: 8%;
+            animation-delay: 3s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+
+        .floating-card .tag {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: rgba(125, 211, 252, 0.15);
+            color: var(--accent-primary);
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .floating-card p {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+        }
+
+        /* Problem Section */
+        .problem-section {
+            padding: 8rem 4rem;
+            position: relative;
+        }
+
+        .section-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-primary);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: center;
+        }
+
+        .problem-content h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 2rem;
+            letter-spacing: -0.02em;
+        }
+
+        .problem-list {
+            list-style: none;
+        }
+
+        .problem-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .problem-list li::before {
+            content: '×';
+            color: #ef4444;
+            font-size: 1.5rem;
+            font-weight: 300;
+            line-height: 1.3;
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .result-box p {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .result-box .emphasis {
+            color: #ef4444;
+        }
+
+        .solution-visual {
+            position: relative;
+        }
+
+        .solution-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .solution-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary));
+        }
+
+        .solution-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            color: var(--accent-primary);
+        }
+
+        .solution-card p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .solution-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .solution-arrow svg {
+            width: 48px;
+            height: 48px;
+            color: var(--accent-primary);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(10px); }
+        }
+
+        .solution-result {
+            background: linear-gradient(135deg, rgba(125, 211, 252, 0.1), rgba(196, 181, 253, 0.1));
+            border: 1px solid rgba(125, 211, 252, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+
+        .solution-result p {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .solution-result .highlight {
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 8rem 4rem;
+            background: var(--bg-secondary);
+            position: relative;
+        }
+
+        .features-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(125, 211, 252, 0.3), transparent);
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 5rem;
+        }
+
+        .section-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 2.5rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(125, 211, 252, 0.05), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(125, 211, 252, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .feature-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .feature-tag {
+            padding: 0.35rem 0.75rem;
+            background: rgba(125, 211, 252, 0.1);
+            border: 1px solid rgba(125, 211, 252, 0.15);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--accent-primary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Value Props Section */
+        .value-section {
+            padding: 8rem 4rem;
+            position: relative;
+        }
+
+        .value-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .value-card {
+            text-align: center;
+            padding: 2rem 1rem;
+            position: relative;
+        }
+
+        .value-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        .value-card h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .value-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Use Cases Section */
+        .usecases-section {
+            padding: 8rem 4rem;
+            background: var(--bg-secondary);
+        }
+
+        .usecases-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .usecase-card {
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-primary));
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 24px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .usecase-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .usecase-card:hover::after {
+            transform: scaleX(1);
+        }
+
+        .usecase-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .usecase-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .usecase-list {
+            list-style: none;
+        }
+
+        .usecase-list li {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .usecase-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-primary);
+        }
+
+        /* Differentiators Section */
+        .diff-section {
+            padding: 8rem 4rem;
+            position: relative;
+        }
+
+        .diff-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .diff-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 3rem;
+        }
+
+        .diff-card {
+            display: flex;
+            gap: 1.5rem;
+            padding: 2rem;
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .diff-card:hover {
+            border-color: rgba(125, 211, 252, 0.2);
+            transform: translateX(8px);
+        }
+
+        .diff-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-secondary);
+            opacity: 0.5;
+            line-height: 1;
+        }
+
+        .diff-content h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .diff-content p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 10rem 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(125, 211, 252, 0.15), transparent 60%);
+            pointer-events: none;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .cta-section .tagline {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+
+        /* Footer */
+        footer {
+            padding: 4rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-tagline {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            max-width: 500px;
+            margin: 0 auto 2rem;
+            line-height: 1.8;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .copyright {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .value-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .usecases-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 968px) {
+            nav {
+                padding: 1rem 2rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .problem-grid {
+                grid-template-columns: 1fr;
+                gap: 4rem;
+            }
+            
+            .diff-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .value-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .usecases-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .floating-elements {
+                display: none;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .hero {
+                padding: 6rem 1.5rem 3rem;
+            }
+            
+            .hero-cta {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .btn-primary, .btn-secondary {
+                width: 100%;
+                text-align: center;
+            }
+            
+            .problem-section,
+            .features-section,
+            .value-section,
+            .usecases-section,
+            .diff-section,
+            .cta-section {
+                padding: 4rem 1.5rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .value-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Scroll animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
 </head>
 <body>
-  <p>Redirecting to <a href="/claude.html">landing page</a>…</p>
+    <div class="gradient-bg"></div>
+    
+    <nav>
+        <div class="logo">Puzle <span>Read</span></div>
+        <ul class="nav-links">
+            <li><a href="#features">功能</a></li>
+            <li><a href="#usecases">场景</a></li>
+            <li><a href="#difference">差异化</a></li>
+        </ul>
+        <a href="#" class="cta-btn">开始使用</a>
+    </nav>
+
+    <section class="hero">
+        <div class="floating-elements">
+            <div class="floating-card">
+                <span class="tag">PKU</span>
+                <p>Knowledge Unit 已生成</p>
+            </div>
+            <div class="floating-card">
+                <span class="tag">Semantic</span>
+                <p>语义压缩完成</p>
+            </div>
+            <div class="floating-card">
+                <span class="tag">Agent</span>
+                <p>智能体已调用</p>
+            </div>
+            <div class="floating-card">
+                <span class="tag">Memory</span>
+                <p>记忆已更新</p>
+            </div>
+        </div>
+        
+        <div class="hero-badge">Puzle Memory Engine 入口级应用</div>
+        <h1>让碎片信息<br><span class="highlight">自动沉淀为知识</span></h1>
+        <p class="hero-subtitle">把你每天阅读、收藏、聊天、搜索、记录的内容——自动抽取、压缩、去噪、关联，沉淀成可检索、可推理、可复用的长期知识资产。</p>
+        <div class="hero-cta">
+            <a href="#" class="btn-primary">立即体验</a>
+            <a href="#features" class="btn-secondary">了解更多</a>
+        </div>
+    </section>
+
+    <section class="problem-section">
+        <div class="problem-grid">
+            <div class="problem-content reveal">
+                <span class="section-label">// 问题</span>
+                <h2>现代人每天接触海量信息，但……</h2>
+                <ul class="problem-list">
+                    <li>看过就忘，无法形成长期记忆</li>
+                    <li>收藏即遗忘，无法有效复用</li>
+                    <li>信息孤岛，无法跨场景联动</li>
+                    <li>格式杂乱——网页、文档、截图、对话……</li>
+                </ul>
+                <div class="result-box">
+                    <p>结果是：<span class="emphasis">信息很多，知识很少。</span></p>
+                </div>
+            </div>
+            <div class="solution-visual reveal">
+                <div class="solution-card">
+                    <h3>Puzle Read 的目标</h3>
+                    <p>把碎片化阅读转化为长期可用的结构化语义资产。不是一个"阅读软件"，而是一个 AI-Native 的知识抽取与理解系统。</p>
+                </div>
+                <div class="solution-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12l7 7 7-7"/>
+                    </svg>
+                </div>
+                <div class="solution-result">
+                    <p>为个人、为团队、也为你正在构建的<span class="highlight">智能体</span>赋能</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features-section" id="features">
+        <div class="section-header reveal">
+            <span class="section-label">// 核心价值</span>
+            <h2>让 "看过的信息" 成为<br>"可以调用的知识"</h2>
+            <p>从输入到理解，从存储到调用，全链路 AI 原生设计</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card reveal">
+                <div class="feature-icon">📥</div>
+                <h3>多源内容输入</h3>
+                <p>支持网页、微信公众号、PDF、研报、截图、Markdown、IM 片段等多种格式，一键导入即可处理。</p>
+                <div class="feature-tags">
+                    <span class="feature-tag">网页</span>
+                    <span class="feature-tag">PDF</span>
+                    <span class="feature-tag">微信</span>
+                    <span class="feature-tag">截图</span>
+                </div>
+            </div>
+            
+            <div class="feature-card reveal">
+                <div class="feature-icon">🧠</div>
+                <h3>自动抽取核心观点</h3>
+                <p>系统自动识别正文、去噪、提取关键观点、主题、因果链、数据点。不仅总结，更生成结构化模型。</p>
+                <div class="feature-tags">
+                    <span class="feature-tag">Who</span>
+                    <span class="feature-tag">What</span>
+                    <span class="feature-tag">Why</span>
+                    <span class="feature-tag">How</span>
+                </div>
+            </div>
+            
+            <div class="feature-card reveal">
+                <div class="feature-icon">🔗</div>
+                <h3>自动关联上下文</h3>
+                <p>自动连接到已有知识库，推荐相关概念、历史笔记、项目脉络。支持构建知识图谱，可视化节点与关系。</p>
+                <div class="feature-tags">
+                    <span class="feature-tag">知识图谱</span>
+                    <span class="feature-tag">关联推荐</span>
+                </div>
+            </div>
+            
+            <div class="feature-card reveal">
+                <div class="feature-icon">📦</div>
+                <h3>输出可复用格式</h3>
+                <p>所有内容沉淀为统一格式的 Puzle Knowledge Units（PKU），可被用户搜索、项目使用、智能体调用。</p>
+                <div class="feature-tags">
+                    <span class="feature-tag">PKU</span>
+                    <span class="feature-tag">JSON</span>
+                    <span class="feature-tag">Markdown</span>
+                </div>
+            </div>
+            
+            <div class="feature-card reveal">
+                <div class="feature-icon">🔄</div>
+                <h3>Memory 全链路联动</h3>
+                <p>阅读产生的知识自动进入 Episodic Memory、Semantic Memory、Project Memory、Resource Memory 四大记忆系统。</p>
+                <div class="feature-tags">
+                    <span class="feature-tag">四层记忆</span>
+                    <span class="feature-tag">自动归档</span>
+                </div>
+            </div>
+            
+            <div class="feature-card reveal">
+                <div class="feature-icon">🤖</div>
+                <h3>智能体直接可用</h3>
+                <p>智能体无需原文，只需要 PKU 即可进行决策辅助、代码生成、文档撰写、市场分析、研究推演。</p>
+                <div class="feature-tags">
+                    <span class="feature-tag">Agent-Ready</span>
+                    <span class="feature-tag">API 调用</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="value-section">
+        <div class="section-header reveal">
+            <span class="section-label">// 核心价值链</span>
+            <h2>读完就能用的知识管理</h2>
+        </div>
+        
+        <div class="value-grid">
+            <div class="value-card reveal">
+                <div class="value-number">01</div>
+                <h4>抽取</h4>
+                <p>自动识别正文<br>去广告去噪声</p>
+            </div>
+            <div class="value-card reveal">
+                <div class="value-number">02</div>
+                <h4>压缩</h4>
+                <p>多层次总结<br>深度逻辑提炼</p>
+            </div>
+            <div class="value-card reveal">
+                <div class="value-number">03</div>
+                <h4>结构化</h4>
+                <p>生成知识卡片<br>构建关系网络</p>
+            </div>
+            <div class="value-card reveal">
+                <div class="value-number">04</div>
+                <h4>关联</h4>
+                <p>连接已有知识<br>自动推荐脉络</p>
+            </div>
+            <div class="value-card reveal">
+                <div class="value-number">05</div>
+                <h4>调用</h4>
+                <p>用户与智能体<br>直接使用知识</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="usecases-section" id="usecases">
+        <div class="section-header reveal">
+            <span class="section-label">// 使用场景</span>
+            <h2>适用于每一个需要知识的人</h2>
+        </div>
+        
+        <div class="usecases-grid">
+            <div class="usecase-card reveal">
+                <div class="usecase-icon">🔬</div>
+                <h3>研究者 / 产品经理 / 创业者</h3>
+                <ul class="usecase-list">
+                    <li>读研报、看论文、读长文，一键沉淀为研究卡片</li>
+                    <li>自动构建"主题地图"——AI、健康、行业趋势</li>
+                    <li>项目内自动汇总所有相关阅读内容</li>
+                </ul>
+            </div>
+            
+            <div class="usecase-card reveal">
+                <div class="usecase-icon">👥</div>
+                <h3>团队与组织</h3>
+                <ul class="usecase-list">
+                    <li>报告 + 资料 + 学习记录 → 共享知识基座</li>
+                    <li>新成员无痛 Onboarding</li>
+                    <li>读完团队积累的 PKUs 即可进入状态</li>
+                </ul>
+            </div>
+            
+            <div class="usecase-card reveal">
+                <div class="usecase-icon">🤖</div>
+                <h3>云端智能体</h3>
+                <ul class="usecase-list">
+                    <li>通过 PKU 获得长期稳定上下文</li>
+                    <li>不再被"上下文遗忘"限制</li>
+                    <li>支持多代理协作任务：分析、规划、推理</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="diff-section" id="difference">
+        <div class="diff-container">
+            <div class="section-header reveal">
+                <span class="section-label">// 为什么选择 Puzle</span>
+                <h2>不是又一个总结工具</h2>
+            </div>
+            
+            <div class="diff-grid">
+                <div class="diff-card reveal">
+                    <div class="diff-number">01</div>
+                    <div class="diff-content">
+                        <h4>Good Slot → Good Memory → Good Result</h4>
+                        <p>从底层设计即围绕智能体的长期记忆与推理能力，而不是传统"总结工具"的思路。</p>
+                    </div>
+                </div>
+                
+                <div class="diff-card reveal">
+                    <div class="diff-number">02</div>
+                    <div class="diff-content">
+                        <h4>自研 Memory Engine 与 PKU 格式</h4>
+                        <p>统一所有输入内容，使之对智能体"可计算、可记忆、可关联"。</p>
+                    </div>
+                </div>
+                
+                <div class="diff-card reveal">
+                    <div class="diff-number">03</div>
+                    <div class="diff-content">
+                        <h4>强大的 ETL 流程</h4>
+                        <p>内置清洗、抽取、模式识别、知识对齐、主题聚类、实体关联流水线。</p>
+                    </div>
+                </div>
+                
+                <div class="diff-card reveal">
+                    <div class="diff-number">04</div>
+                    <div class="diff-content">
+                        <h4>Agent-First 设计理念</h4>
+                        <p>不是为人类阅读而存在，而是为未来的 AI 合作者做数据准备。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="cta-content reveal">
+            <span class="section-label">// 开始使用</span>
+            <h2>让知识真正为你工作</h2>
+            <p class="tagline">Puzle Read — 让"看过的信息"成为"可以调用的知识"。<br>为用户，为团队，也为你正在构建的智能体。</p>
+            <div class="cta-buttons">
+                <a href="#" class="btn-primary">免费开始</a>
+                <a href="#" class="btn-secondary">预约演示</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-logo">Puzle Read</div>
+        <p class="footer-tagline">把碎片化阅读转化为长期可用的结构化语义资产。<br>AI-Native 的知识抽取与理解系统。</p>
+        <div class="footer-links">
+            <a href="#">产品文档</a>
+            <a href="#">API 接入</a>
+            <a href="#">关于我们</a>
+            <a href="#">联系我们</a>
+        </div>
+        <p class="copyright">© 2025 Puzle. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Scroll reveal animation
+        const reveals = document.querySelectorAll('.reveal');
+        
+        const revealOnScroll = () => {
+            reveals.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (elementTop < windowHeight - 100) {
+                    element.classList.add('visible');
+                }
+            });
+        };
+        
+        window.addEventListener('scroll', revealOnScroll);
+        window.addEventListener('load', revealOnScroll);
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Parallax effect for floating cards
+        document.addEventListener('mousemove', (e) => {
+            const cards = document.querySelectorAll('.floating-card');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            cards.forEach((card, index) => {
+                const speed = (index + 1) * 10;
+                const xOffset = (x - 0.5) * speed;
+                const yOffset = (y - 0.5) * speed;
+                card.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+            });
+        });
+    </script>
 </body>
 </html>
-
